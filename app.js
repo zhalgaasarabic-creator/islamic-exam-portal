@@ -1432,25 +1432,8 @@ document.addEventListener("DOMContentLoaded", () => {
   studentFinishBtn.addEventListener("click", () => {
     resetQuizState();
     
-    // Clear session storage
-    sessionStorage.removeItem("exam_user");
-    currentUser = null;
-    currentGroup = null;
-    userRole = null;
-    
-    // Reset login form inputs
-    studentNameInput.value = "";
-    studentGroupInput.selectedIndex = 0;
-    
-    // Hide app screen and show login screen
-    appContainer.classList.add("hidden");
-    loginScreen.classList.remove("hidden");
-    
-    // Animate login screen entry
-    loginScreen.style.opacity = 0;
-    setTimeout(() => {
-      loginScreen.style.opacity = 1;
-    }, 50);
+    // Smoothly return to the main dashboard to select the next exam
+    switchTab("dashboard-view");
   });
 
   const renderQuizReview = () => {
