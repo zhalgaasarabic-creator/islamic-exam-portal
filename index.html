@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ислами Емтихан Порталы | 2-Курс</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome for Premium Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+  <!-- WELCOME & REGISTRATION SCREEN -->
+  <div class="login-container" id="login-screen">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">
+          <i class="fa-solid fa-mosque"></i>
+        </div>
+        <h1>Ислами Емтихан Порталы</h1>
+        <p>Сынақты немесе жаттығуды бастау үшін тіркеліңіз</p>
+      </div>
+      <div class="login-body">
+        <div id="student-login-form">
+          <div class="form-group">
+            <label for="student-name">Аты-жөніңіз (Толық):</label>
+            <input type="text" class="form-control" id="student-name" placeholder="Мысалы: Зәйд ибн Сабит">
+          </div>
+          <div class="form-group">
+            <label for="student-group">Тобыңыз / Курсыңыз:</label>
+            <select class="form-control" id="student-group">
+              <option value="2-курс ұлдар" selected>2-курс ұлдар тобы</option>
+              <option value="2-курс сырттай">2-курс сырттай бөлім</option>
+              <option value="1-курс қыздар">1-курс қыздар тобы</option>
+              <option value="Басқа топ">Басқа топ</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-block btn-lg" id="student-login-btn">
+            <i class="fa-solid fa-graduation-cap"></i> Емтиханға кіру
+          </button>
+        </div>
+        
+        <div class="login-divider">
+          <span>немесе</span>
+        </div>
+        
+        <button class="btn btn-outline btn-block" id="show-teacher-login-btn">
+          <i class="fa-solid fa-chalkboard-user"></i> Ұстаз бөлмесіне кіру
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEACHER PASSCODE MODAL -->
+  <div class="modal-overlay hidden" id="passcode-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-logo">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <h3>Қауіпсіз кіру жүйесі</h3>
+        <p>Ұстаз бөлмесіне кіру үшін құпия сөзді енгізіңіз</p>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <input type="password" class="form-control text-center" id="teacher-passcode-input" placeholder="Құпия сөзді енгізіңіз">
+          <p id="passcode-error" class="error-text hidden" style="color: var(--accent-danger); font-size: 12px; margin-top: 8px; font-weight: 600;">
+            <i class="fa-solid fa-circle-exclamation"></i> Қате құпия сөз! Қайта көріңіз.
+          </p>
+        </div>
+        <div class="modal-actions" style="display: flex; gap: 15px; margin-top: 20px;">
+          <button class="btn btn-outline" style="flex: 1;" id="close-passcode-modal-btn">Жабу</button>
+          <button class="btn btn-primary" style="flex: 1;" id="submit-passcode-btn">Кіру</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUESTION EDIT MODAL -->
+  <div class="modal-overlay hidden" id="question-edit-modal">
+    <div class="modal-card" style="max-width: 600px; border-top: 6px solid var(--color-gold);">
+      <div class="modal-header">
+        <div class="modal-logo" style="background-color: var(--color-emerald-light); color: var(--color-emerald);">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </div>
+        <h3>Сұрақты өңдеу бұрышы</h3>
+        <p>Тест сұрағы мен жауап нұсқаларын өзгертіңіз</p>
+      </div>
+      <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding-right: 5px;">
+        <input type="hidden" id="edit-q-id">
+        
+        <div class="form-group">
+          <label for="edit-q-text">Сұрақ мәтіні:</label>
+          <textarea class="form-control" id="edit-q-text" rows="3" style="height: auto; padding: 12px; resize: vertical;"></textarea>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="edit-q-opt-a">А) жауап нұсқасы:</label>
+            <input type="text" class="form-control" id="edit-q-opt-a">
+          </div>
+          <div class="form-group col-md-6">
+            <label for="edit-q-opt-b">Б) жауап нұсқасы:</label>
+            <input type="text" class="form-control" id="edit-q-opt-b">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="edit-q-opt-c">В) жауап нұсқасы:</label>
+            <input type="text" class="form-control" id="edit-q-opt-c">
+          </div>
+          <div class="form-group col-md-6">
+            <label for="edit-q-opt-d">Г) жауап нұсқасы:</label>
+            <input type="text" class="form-control" id="edit-q-opt-d">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="edit-q-correct">Дұрыс жауап нұсқасы:</label>
+          <select class="form-control" id="edit-q-correct">
+            <option value="0">А) нұсқасы</option>
+            <option value="1">Б) нұсқасы</option>
+            <option value="2">В) нұсқасы</option>
+            <option value="3">Г) нұсқасы</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="edit-q-explanation">Шариғи / Грамматикалық талдау (Түсіндірме):</label>
+          <textarea class="form-control" id="edit-q-explanation" rows="3" style="height: auto; padding: 12px; resize: vertical;"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="edit-q-topic">Сұрақ тақырыбы:</label>
+            <input type="text" class="form-control" id="edit-q-topic">
+          </div>
+          <div class="form-group col-md-6">
+            <label for="edit-q-reference">Дереккөз сілтемесі:</label>
+            <input type="text" class="form-control" id="edit-q-reference">
+          </div>
+        </div>
+        
+        <div class="modal-actions" style="display: flex; gap: 15px; margin-top: 25px; position: sticky; bottom: 0; background: var(--bg-secondary); padding: 10px 0 0 0;">
+          <button class="btn btn-outline" style="flex: 1;" id="close-edit-modal-btn">Жабу</button>
+          <button class="btn btn-primary" style="flex: 1;" id="save-edit-question-btn">Өзгерісті Сақтау</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container hidden" id="app-container">
+    
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-mosque"></i>
+        </div>
+        <div class="brand-info">
+          <h2>Емтихан Порталы</h2>
+          <span id="sidebar-brand-course">2-курс ұлдарға арналған</span>
+        </div>
+      </div>
+      
+      <nav class="sidebar-menu">
+        <a href="#" class="menu-item active" data-target="dashboard-view" id="nav-dashboard">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Басқару панелі</span>
+        </a>
+        <a href="#" class="menu-item" data-target="books-view" id="nav-books">
+          <i class="fa-solid fa-book-open"></i>
+          <span>Кітаптар қоры</span>
+        </a>
+        <a href="#" class="menu-item" data-target="quiz-view" id="nav-quiz">
+          <i class="fa-solid fa-circle-question"></i>
+          <span>Интерактивті тест</span>
+        </a>
+        <a href="#" class="menu-item" data-target="teacher-view" id="nav-teacher">
+          <i class="fa-solid fa-chalkboard-user"></i>
+          <span>Мұғалім бөлмесі</span>
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="user-profile" style="display: flex; align-items: center; gap: 10px; width: 100%;">
+          <div class="user-avatar">Ұ</div>
+          <div class="user-details" style="flex: 1; min-width: 0;">
+            <h4>Шәкірттер базасы</h4>
+            <p>2-курс ұлдар тобы</p>
+          </div>
+          <button class="logout-btn" id="logout-btn" title="Жүйеден шығу" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 8px; font-size: 16px; transition: color 0.2s; display: flex; align-items: center; justify-content: center;">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- MAIN CONTENT AREA -->
+    <main class="main-content">
+      
+      <!-- TOP HEADER -->
+      <header class="top-header">
+        <button class="mobile-toggle" id="mobile-toggle">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="header-search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" placeholder="Сұрақтарды немесе тақырыптарды іздеу..." id="global-search-input">
+        </div>
+        <div class="header-actions">
+          <button class="action-btn theme-toggle" id="theme-toggle" title="Түс тақырыбын өзгерту">
+            <i class="fa-solid fa-moon"></i>
+          </button>
+          <div class="current-date">
+            <i class="fa-regular fa-calendar-days"></i>
+            <span id="date-display">2026 жыл, 23 мамыр</span>
+          </div>
+        </div>
+      </header>
+      
+      <div class="content-body">
+        
+        <!-- 1. DASHBOARD VIEW -->
+        <section class="view-section active" id="dashboard-view">
+          <div class="welcome-banner">
+            <div class="banner-text">
+              <h1>Ассаламу алейкум, Құрметті Ұстаздар мен Шәкірттер!</h1>
+              <p id="dashboard-welcome-desc">2-курс ұлдар тобына арналған классикалық ислами кітаптар бойынша емтихан дайындау және оқу порталына қош келдіңіздер.</p>
+              <div class="banner-badges" id="dashboard-welcome-badges">
+                <span class="badge"><i class="fa-solid fa-circle-check"></i> 120 кәсіби сұрақ</span>
+                <span class="badge"><i class="fa-solid fa-print"></i> Баспаға дайын билеттер</span>
+                <span class="badge"><i class="fa-solid fa-bolt"></i> Интерактивті тест</span>
+              </div>
+            </div>
+            <div class="banner-img">
+              <i class="fa-solid fa-book-quran"></i>
+            </div>
+          </div>
+          
+          <!-- QUICK STATS -->
+          <div class="stats-grid" id="dashboard-stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon icon-izhar">
+                <i class="fa-solid fa-language"></i>
+              </div>
+              <div class="stat-info">
+                <h3>Изһар кітабы</h3>
+                <p class="stat-val">40 сұрақ</p>
+                <p class="stat-desc">Араб тілі синтаксисі (Нәху)</p>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-icon icon-quduri">
+                <i class="fa-solid fa-scale-balanced"></i>
+              </div>
+              <div class="stat-info">
+                <h3>Қудури кітабы</h3>
+                <p class="stat-val">40 сұрақ</p>
+                <p class="stat-desc">Қажылықтан Неке/Талаққа дейін</p>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-icon icon-tahawi">
+                <i class="fa-solid fa-kaaba"></i>
+              </div>
+              <div class="stat-info">
+                <h3>Тахауи (Ғазнауи)</h3>
+                <p class="stat-val">40 сұрақ</p>
+                <p class="stat-desc">Ханафи сенім негіздері (Ақида)</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- BOOK CARDS SECTION -->
+          <h2 class="section-title"><i class="fa-solid fa-graduation-cap"></i> Кітаптарды меңгеру бұрышы</h2>
+          <div class="books-grid" id="dashboard-books-grid">
+            
+            <!-- Izhar Card -->
+            <div class="book-card card-izhar">
+              <div class="book-card-header">
+                <span class="book-tag tag-izhar">Нәху</span>
+                <h3>Изһар ал-Асрар</h3>
+                <p class="author">Имам әл-Биргиви</p>
+              </div>
+              <div class="book-card-body">
+                <p>Араб тілінің грамматикасын, сөздердің сөйлемдегі септелу ережелерін (Әмил, Мәъмул, Иғраб) оқытатын классикалық еңбек.</p>
+                <div class="topics-covered">
+                  <span>Әмил ләфзи & мәнәуи</span>
+                  <span>Марфуғат & Мансубат</span>
+                  <span>Тәбиғ сөздер</span>
+                </div>
+              </div>
+              <div class="book-card-footer">
+                <button class="btn btn-outline start-study-btn" data-book="izhar"><i class="fa-solid fa-book"></i> Оқу</button>
+                <button class="btn btn-primary start-quiz-btn" data-book="izhar"><i class="fa-solid fa-play"></i> Тест</button>
+              </div>
+            </div>
+            
+            <!-- Quduri Card -->
+            <div class="book-card card-quduri">
+              <div class="book-card-header">
+                <span class="book-tag tag-quduri">Фиқһ</span>
+                <h3>Мухтасар әл-Қудури</h3>
+                <p class="author">Имам әл-Қудури</p>
+              </div>
+              <div class="book-card-body">
+                <p>Ханафи мәзһабының негізгі заңдары. Бұл бөлімде Қажылық парыздары мен отбасылық қатынастар (Неке, Талақ, Иддәт) қамтылған.</p>
+                <div class="topics-covered">
+                  <span>Қажылық & Миқаттар</span>
+                  <span>Неке шарттары & Мәһр</span>
+                  <span>Талақ түрлері & Иддәт</span>
+                </div>
+              </div>
+              <div class="book-card-footer">
+                <button class="btn btn-outline start-study-btn" data-book="quduri"><i class="fa-solid fa-book"></i> Оқу</button>
+                <button class="btn btn-primary start-quiz-btn" data-book="quduri"><i class="fa-solid fa-play"></i> Тест</button>
+              </div>
+            </div>
+            
+            <!-- Tahawi Card -->
+            <div class="book-card card-tahawi">
+              <div class="book-card-header">
+                <span class="book-tag tag-tahawi">Ақида</span>
+                <h3>Тахауи (Ғазнауи шархы)</h3>
+                <p class="author">Имам әт-Тахауи / Имам әл-Ғазнауи</p>
+              </div>
+              <div class="book-card-body">
+                <p>Әһлі сүннет уәл-жамағаттың бұлжымас сенім негіздері. Аллаһтың сипаттары, тағдыр, ақырет және сахабалар ережелері.</p>
+                <div class="topics-covered">
+                  <span>Таухид & Сипаттар</span>
+                  <span>Тағдыр & Ләухул-Махфуз</span>
+                  <span>Иман & Сахабалар әдебі</span>
+                </div>
+              </div>
+              <div class="book-card-footer">
+                <button class="btn btn-outline start-study-btn" data-book="tahawi"><i class="fa-solid fa-book"></i> Оқу</button>
+                <button class="btn btn-primary start-quiz-btn" data-book="tahawi"><i class="fa-solid fa-play"></i> Тест</button>
+              </div>
+            </div>
+            
+          </div>
+        </section>
+        
+        <!-- 2. BOOKS EXPLORE VIEW -->
+        <section class="view-section" id="books-view">
+          <div class="section-header-row" style="margin-bottom: 30px;">
+            <div>
+              <h2 class="section-title"><i class="fa-solid fa-book-open"></i> Сұрақтар мен кітаптар базасы</h2>
+              <p>Оқу курстары мен кітаптар иерархиясы бойынша сұрақтарды жүйелі түрде көріп, талдаңыз.</p>
+            </div>
+            <div>
+              <button class="btn btn-outline" id="toggle-all-answers-btn">
+                <i class="fa-solid fa-eye"></i> Жауаптарын көрсету
+              </button>
+            </div>
+          </div>
+
+          <!-- Hierarchical Course Selection -->
+          <div class="course-selector-section" style="margin-bottom: 25px;">
+            <h4 class="selector-title"><i class="fa-solid fa-layer-group"></i> 1. Оқу курсын таңдаңыз:</h4>
+            <div class="course-cards-grid" id="course-selector-grid">
+              <div class="course-card active" data-course="2-курс ұлдар">
+                <div class="course-card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                <div class="course-card-info">
+                  <h3>2-курс ұлдар тобы</h3>
+                  <p>Күндізгі бөлімнің негізгі бағдарламасы</p>
+                </div>
+              </div>
+              <div class="course-card" data-course="2-курс сырттай">
+                <div class="course-card-icon"><i class="fa-solid fa-user-graduate"></i></div>
+                <div class="course-card-info">
+                  <h3>2-курс сырттай бөлім</h3>
+                  <p>Сырттай оқитын шәкірттер бағдарламасы</p>
+                </div>
+              </div>
+              <div class="course-card" data-course="1-курс қыздар">
+                <div class="course-card-icon"><i class="fa-solid fa-venus"></i></div>
+                <div class="course-card-info">
+                  <h3>1-курс қыздар тобы</h3>
+                  <p>Күндізгі бөлім қыздар бағдарламасы</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hierarchical Book Selection Tabs -->
+          <div class="book-selector-section" style="margin-bottom: 30px;">
+            <h4 class="selector-title"><i class="fa-solid fa-book-open"></i> 2. Кітапты таңдаңыз:</h4>
+            <div class="book-tabs-list" id="book-tabs-list">
+              <!-- Rendered dynamically in app.js -->
+            </div>
+          </div>
+          
+          <div class="search-result-info-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+            <div class="search-result-info" id="search-result-count" style="margin: 0; font-weight: 600; color: var(--text-secondary);">Жалпы сұрақтар саны: 120 сұрақ</div>
+            <div style="font-size: 13px; color: var(--text-muted); font-style: italic;" id="active-path-indicator">2-курс ұлдар тобы > Барлық кітаптар</div>
+          </div>
+          
+          <div class="questions-list-container" id="questions-list">
+            <!-- Questions loaded dynamically via JS -->
+          </div>
+        </section>
+        
+        <!-- 3. INTERACTIVE QUIZ VIEW -->
+        <section class="view-section" id="quiz-view">
+          
+          <!-- Quiz Setup Panel -->
+          <div class="quiz-setup-card" id="quiz-setup-panel">
+            <div class="quiz-setup-header">
+              <i class="fa-solid fa-clipboard-question"></i>
+              <h2>Тест параметрлерін таңдаңыз</h2>
+              <p>Өзіңіздің біліміңізді тексеру үшін тест форматын реттеңіз.</p>
+            </div>
+            <div class="quiz-setup-body">
+              <div class="form-group">
+                <label>Емтихан пәнін таңдаңыз:</label>
+                <div class="radio-cards-grid">
+                  <label class="radio-card selected">
+                    <input type="radio" name="quiz-book" value="mix" checked>
+                    <div class="radio-card-content">
+                      <span class="card-icon"><i class="fa-solid fa-shuffle"></i></span>
+                      <h4>Аралас емтихан</h4>
+                      <p>Үш кітаптан теңдей сұрақтар жиналады</p>
+                    </div>
+                  </label>
+                  
+                  <label class="radio-card">
+                    <input type="radio" name="quiz-book" value="izhar">
+                    <div class="radio-card-content">
+                      <span class="card-icon"><i class="fa-solid fa-language"></i></span>
+                      <h4>Изһар кітабы</h4>
+                      <p>Араб синтаксисі (Нәху ережелері)</p>
+                    </div>
+                  </label>
+                  
+                  <label class="radio-card">
+                    <input type="radio" name="quiz-book" value="quduri">
+                    <div class="radio-card-content">
+                      <span class="card-icon"><i class="fa-solid fa-scale-balanced"></i></span>
+                      <h4>Қудури кітабы</h4>
+                      <p>Қажылық, Неке және Талақ үкімдері</p>
+                    </div>
+                  </label>
+                  
+                  <label class="radio-card">
+                    <input type="radio" name="quiz-book" value="tahawi">
+                    <div class="radio-card-content">
+                      <span class="card-icon"><i class="fa-solid fa-kaaba"></i></span>
+                      <h4>Тахауи ақидасы</h4>
+                      <p>Ғазнауи шархы негізінде</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+              
+              <div class="form-row" id="quiz-params-row">
+                <div class="form-group col-md-6">
+                  <label for="quiz-question-count">Сұрақтар саны:</label>
+                  <select class="form-control" id="quiz-question-count">
+                    <option value="15">15 сұрақ (Жылдам тест)</option>
+                    <option value="30" selected>30 сұрақ (Стандартты тест)</option>
+                    <option value="40">40 сұрақ (Толық емтихан)</option>
+                    <option value="60">60 сұрақ (Үлкен сынақ)</option>
+                  </select>
+                </div>
+                
+                <div class="form-group col-md-6">
+                  <label for="quiz-time-limit">Уақыт шектеуі (бір сұраққа):</label>
+                  <select class="form-control" id="quiz-time-limit">
+                    <option value="30">30 секунд</option>
+                    <option value="60" selected>60 секунд (1 минут)</option>
+                    <option value="120">120 секунд (2 минут)</option>
+                    <option value="0">Шектеусіз</option>
+                  </select>
+                </div>
+              </div>
+              
+              <button class="btn btn-primary btn-lg btn-block" id="start-quiz-now-btn">
+                <i class="fa-solid fa-circle-play"></i> Сынақты Бастау
+              </button>
+            </div>
+          </div>
+          
+          <!-- Active Quiz Play Panel -->
+          <div class="quiz-play-container hidden" id="quiz-play-panel">
+            <div class="quiz-play-header">
+              <div class="quiz-info-left">
+                <span class="quiz-book-badge" id="quiz-active-book-title">Аралас емтихан</span>
+                <span class="quiz-question-number" id="quiz-q-progress">Сұрақ: 1 / 30</span>
+              </div>
+              <div class="quiz-timer-container">
+                <i class="fa-regular fa-clock"></i>
+                <span id="quiz-timer">00:59</span>
+              </div>
+            </div>
+            
+            <div class="quiz-progress-bar-bg">
+              <div class="quiz-progress-bar-fill" id="quiz-progress-bar" style="width: 3.33%;"></div>
+            </div>
+            
+            <div class="quiz-question-card">
+              <div class="quiz-question-tag" id="quiz-question-topic">Тақырыбы: Амилдер жүйесі</div>
+              <h2 class="quiz-question-text" id="quiz-question-text">Сұрақ мәтіні осы жерде көрсетіледі?</h2>
+              
+              <div class="quiz-options-list" id="quiz-options-container">
+                <!-- Loaded dynamically -->
+              </div>
+            </div>
+            
+            <div class="quiz-play-footer">
+              <button class="btn btn-outline" id="quit-quiz-btn"><i class="fa-solid fa-arrow-left"></i> Шығу</button>
+              <button class="btn btn-primary" id="next-question-btn" disabled>Келесі сұрақ <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+          </div>
+          
+          <!-- Quiz Result Panel -->
+          <div class="quiz-result-container hidden" id="quiz-result-panel">
+            <div class="result-score-circle" id="result-score-circle">
+              <span class="score-percent" id="result-percent">85%</span>
+              <span class="score-fraction" id="result-fraction">25 / 30</span>
+            </div>
+            
+            <h2 class="result-title" id="result-title">Керемет нәтиже!</h2>
+            <p class="result-subtitle" id="result-subtitle">Сіз емтиханнан сүрінбей өттіңіз, Аллаһ біліміңізді арттырсын.</p>
+            
+            <div class="result-stats-row" id="result-stats-row">
+              <div class="result-stat-box">
+                <span class="val" id="result-total-q">30</span>
+                <span class="label">Жалпы сұрақ</span>
+              </div>
+              <div class="result-stat-box success">
+                <span class="val" id="result-correct-q">25</span>
+                <span class="label">Дұрыс жауап</span>
+              </div>
+              <div class="result-stat-box danger">
+                <span class="val" id="result-wrong-q">5</span>
+                <span class="label">Қате жауап</span>
+              </div>
+            </div>
+            
+            <div class="result-actions">
+              <button class="btn btn-primary" id="retry-quiz-btn"><i class="fa-solid fa-arrow-rotate-right"></i> Қайта тапсыру</button>
+              <button class="btn btn-outline" id="view-wrong-answers-btn"><i class="fa-solid fa-triangle-exclamation"></i> Қатемен жұмыс</button>
+              <button class="btn btn-primary hidden" id="student-finish-btn" style="width: 100%;"><i class="fa-solid fa-circle-check"></i> Жүйеден шығу (Емтиханды аяқтау)</button>
+            </div>
+            
+            <!-- Review Wrong Answers -->
+            <div class="quiz-review-section hidden" id="quiz-review-container">
+              <h3 class="review-title">Қате жауап берілген сұрақтарды талдау:</h3>
+              <div class="review-questions-list" id="review-list">
+                <!-- Loaded dynamically -->
+              </div>
+            </div>
+          </div>
+          
+        </section>
+        
+
+        
+        <!-- 5. TEACHER CONSOLE & EXAM GENERATOR -->
+        <section class="view-section" id="teacher-view">
+          <div class="welcome-banner teacher-banner">
+            <div class="banner-text">
+              <h1><i class="fa-solid fa-chalkboard-user"></i> Ұстаздарға арналған емтихан кабинеті</h1>
+              <p>Мұнда сіз дайын сұрақтар негізінде A4 форматында басып шығаруға қолайлы емтихан билеттерін немесе жалпы емтихан парақтарын автоматты түрде генерациялай аласыз.</p>
+            </div>
+          </div>
+          
+          <div class="teacher-grid">
+            <!-- Left Side: Controls -->
+            <div class="teacher-controls-card">
+              <h3><i class="fa-solid fa-sliders"></i> Билет генераторының параметрлері</h3>
+              <hr>
+              
+              <div class="form-group">
+                <label>1. Емтиханға қосылатын кітаптарды таңдаңыз:</label>
+                <div class="checkbox-group" id="teach-book-checkboxes">
+                  <label class="custom-checkbox">
+                    <input type="checkbox" id="teach-book-izhar" checked>
+                    <span>Изһар кітабы (Араб синтаксисі)</span>
+                  </label>
+                  <label class="custom-checkbox">
+                    <input type="checkbox" id="teach-book-quduri" checked>
+                    <span>Қудури кітабы (Қажылық - Талақ)</span>
+                  </label>
+                  <label class="custom-checkbox">
+                    <input type="checkbox" id="teach-book-tahawi" checked>
+                    <span>Тахауи ақидасы (Ғазнауи шархы)</span>
+                  </label>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="questions-per-book">2. Әр кітаптан таңдалатын сұрақ саны:</label>
+                <select class="form-control" id="questions-per-book">
+                  <option value="2">Әр кітаптан 2 сұрақ (Барлығы 6 сұрақ)</option>
+                  <option value="5" selected>Әр кітаптан 5 сұрақ (Барлығы 15 сұрақ)</option>
+                  <option value="10">Әр кітаптан 10 сұрақ (Барлығы 30 сұрақ)</option>
+                  <option value="15">Әр кітаптан 15 сұрақ (Барлығы 45 сұрақ)</option>
+                  <option value="20">Әр кітаптан 20 сұрақ (Барлығы 60 сұрақ)</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label>3. Емтихан форматы:</label>
+                <div class="radio-group-vertical">
+                  <label class="custom-radio">
+                    <input type="radio" name="teach-exam-format" value="with-options" checked>
+                    <span>Тест форматы (А, Б, В, Г нұсқаларымен)</span>
+                  </label>
+                  <label class="custom-radio">
+                    <input type="radio" name="teach-exam-format" value="open-questions">
+                    <span>Ашық сұрақтар форматы (тек сұрақтар, жазбаша жауап үшін орын)</span>
+                  </label>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label>4. Қосымша параметрлер:</label>
+                <div class="checkbox-group">
+                  <label class="custom-checkbox">
+                    <input type="checkbox" id="teach-include-key" checked>
+                    <span>Емтихан соңына жауап кілттерін қосу (Мұғалім үшін пайдалы)</span>
+                  </label>
+                  <label class="custom-checkbox">
+                    <input type="checkbox" id="teach-random-order" checked>
+                    <span>Сұрақтарды кездейсоқ ретпен араластырып орналастыру</span>
+                  </label>
+                </div>
+              </div>
+              
+              <button class="btn btn-primary btn-block btn-lg" id="generate-exam-sheet-btn">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Емтихан парағын жасау
+              </button>
+            </div>
+            
+            <!-- Right Side: Preview & Print -->
+            <div class="teacher-preview-card">
+              <div class="preview-header">
+                <h3><i class="fa-solid fa-eye"></i> Емтихан билетінің алдын ала көрінісі</h3>
+                <button class="btn btn-success disabled" id="print-exam-btn" disabled>
+                  <i class="fa-solid fa-print"></i> Басып шығару (Print)
+                </button>
+              </div>
+              <hr>
+              
+              <div class="exam-sheet-preview-container" id="exam-sheet-preview">
+                <div class="empty-preview-state">
+                  <i class="fa-solid fa-print"></i>
+                  <p>Сол жақтан параметрлерді таңдап, "Емтихан парағын жасау" батырмасын басыңыз.</p>
+                  <p class="sub">Жүйе A4 парағына толық сәйкестендірілген, баспаға дайын құжат дайындайды.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Student Results Persistence Table -->
+          <div class="student-results-card" style="margin-top: 30px; background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 30px; box-shadow: var(--shadow-md);">
+            <div class="preview-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+              <h3><i class="fa-solid fa-users"></i> Шәкірттердің емтихан нәтижелері</h3>
+              <div class="filter-controls" style="display: flex; gap: 12px;">
+                <button class="btn btn-success" id="export-excel-btn" style="background-color: #1D7843; border-color: #1D7843; color: white; display: inline-flex; align-items: center; gap: 8px;">
+                  <i class="fa-solid fa-file-excel"></i> Excel-ге жүктеу
+                </button>
+                <button class="btn btn-outline" id="refresh-results-btn">
+                  <i class="fa-solid fa-arrow-rotate-right"></i> Жаңарту
+                </button>
+                <button class="btn btn-outline" style="border-color: var(--accent-danger); color: var(--accent-danger);" id="clear-all-results-btn">
+                  <i class="fa-solid fa-trash-can"></i> Тізімді тазарту
+                </button>
+              </div>
+            </div>
+            <hr style="border: none; height: 1px; background-color: var(--border-color); margin: 15px 0 20px 0;">
+            <div class="results-table-container" style="overflow-x: auto; margin-top: 15px;">
+              <table class="results-table" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                <thead>
+                  <tr style="border-bottom: 2px solid var(--border-color); font-weight: 700; color: var(--text-secondary);">
+                    <th style="padding: 12px 16px;">Шәкірттің аты-жөні</th>
+                    <th style="padding: 12px 16px;">Тобы / Курсы</th>
+                    <th style="padding: 12px 16px;">Емтихан пәні</th>
+                    <th style="padding: 12px 16px;">Балл</th>
+                    <th style="padding: 12px 16px;">Пайыздық көрсеткіш</th>
+                    <th style="padding: 12px 16px;">Тапсырған уақыты</th>
+                    <th style="padding: 12px 16px;">Әрекет</th>
+                  </tr>
+                </thead>
+                <tbody id="student-results-tbody">
+                  <!-- Dynamic rows loaded from API -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+        
+      </div>
+    </main>
+    
+  </div>
+
+  <!-- PRINT WRAPPER FOR PRINT PREVIEW (Hidden in UI, displayed in print media) -->
+  <div id="print-paper-container" class="print-only">
+    <!-- Generated print layout will go here -->
+  </div>
+
+  <!-- Custom JS -->
+  <script src="questions.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
