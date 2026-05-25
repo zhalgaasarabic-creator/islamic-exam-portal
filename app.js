@@ -144,8 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (globalSearchInput) globalSearchInput.value = "";
     selectedBook = "all";
     
-    // Clear completed books from session storage on logout
-    sessionStorage.removeItem("completed_books");
+
   };
 
   // ==========================================================================
@@ -299,6 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         // Clear session storage
         sessionStorage.removeItem("exam_user");
+        sessionStorage.removeItem("completed_books");
         currentUser = null;
         currentGroup = null;
         userRole = null;
@@ -1202,7 +1202,17 @@ document.addEventListener("DOMContentLoaded", () => {
     quizQProgress.textContent = `Сұрақ: ${currentQuizIndex + 1} / ${quizQuestions.length}`;
     quizProgressBar.style.width = `${((currentQuizIndex + 1) / quizQuestions.length) * 100}%`;
     
-    const bookTitle = q.book === "izhar" ? "Изһар (Наху)" : q.book === "quduri" ? "Қудури (Фиқһ)" : "Тахауи (Ақида)";
+    const bookNames = {
+      "izhar": "Изһар (Нәху)",
+      "quduri": "Қудури (Фиқһ)",
+      "tahawi": "Тахауи (Ақида)",
+      "sarf_izzi": "Сарф Иззи",
+      "miat_amil": "Шарх Миәти Амил",
+      "nahw_tatbiqi": "Нахву Татбиқи",
+      "tahawi_text": "Тахауи (Мәтін)",
+      "nur_al_idah": "Нұр әл-Идах"
+    };
+    const bookTitle = bookNames[q.book] || "Емтихан";
     quizActiveBookTitle.textContent = bookTitle;
     quizQuestionTopic.textContent = `Тақырыбы: ${q.topic}`;
     quizQuestionText.textContent = q.question;
@@ -1378,7 +1388,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       // Clean pedagogical text
       resultTitle.textContent = "Емтихан аяқталды!";
-      resultSubtitle.textContent = "МашаАллаһ! Сіз сынақты толық аяқтадыңыз. Жауаптарыңыз тексеру үшін ұстазға сәтті жіберілді. Нәтижеңізді ұстаздан біле аласыз.";
+      resultSubtitle.textContent = "МашаАллаһ! Сіз сынақты толық аяқтадыңыз. Жауаптарыңыз тексеру үшін ұстазға сәтті жіберілді. Енді басты бетке оралып, басқа пәндерді де тапсыра аласыз.";
     } else {
       // Show full details for teacher/admin testing
       resultScoreCircle.classList.remove("hidden");
