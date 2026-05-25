@@ -1030,7 +1030,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let books = [];
     if (activeCourse === "1-курс қыздар") {
       books = [
-        { id: "mix", title: "Аралас емтихан", icon: "fa-solid fa-shuffle", desc: "Бес кітаптан теңдей сұрақтар жиналады" },
         { id: "sarf_izzi", title: "Сарф Иззи", icon: "fa-solid fa-language", desc: "Араб сөзжасамы (Сарф ережелері)" },
         { id: "miat_amil", title: "Шарх Миәти Амил", icon: "fa-solid fa-lines-leaning", desc: "11-нші нәуътен кітаптың соңына дейін" },
         { id: "nahw_tatbiqi", title: "Нахву Татбиқи", icon: "fa-solid fa-signature", desc: "Кітап басынан Мамнуъ минассарфқа дейін" },
@@ -1039,7 +1038,6 @@ document.addEventListener("DOMContentLoaded", () => {
       ];
     } else {
       books = [
-        { id: "mix", title: "Аралас емтихан", icon: "fa-solid fa-shuffle", desc: "Үш кітаптан теңдей сұрақтар жиналады" },
         { id: "izhar", title: "Изһар кітабы", icon: "fa-solid fa-language", desc: "Араб синтаксисі (Нәху ережелері)" },
         { id: "quduri", title: "Қудури кітабы", icon: "fa-solid fa-scale-balanced", desc: "Қажылық, Неке және Талақ үкімдері" },
         { id: "tahawi", title: "Тахауи ақидасы", icon: "fa-solid fa-kaaba", desc: "Ғазнауи шархы негізінде" }
@@ -1805,6 +1803,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // 9. STUDENT PERSISTED RESULTS (TEACHER PANEL ONLY)
   // ==========================================================================
 
+  let rawStudentResults = [];
+  let filteredStudentResults = [];
+
   // Load results from Node server API
   const loadStudentResults = () => {
     studentResultsTbody.innerHTML = `
@@ -1821,7 +1822,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return res.json();
       })
       .then(data => {
-        renderStudentResultsTable(data);
+        rawStudentResults = data;
+        applyResultsFiltering();
       })
       .catch(err => {
         console.error("Error loading results:", err);
@@ -1833,6 +1835,38 @@ document.addEventListener("DOMContentLoaded", () => {
           </tr>
         `;
       });
+  };
+
+  // Filter student results dynamically based on inputs
+  const applyResultsFiltering = () => {
+    const searchNameInput = document.getElementById("results-search-name");
+    const filterCourseSelect = document.getElementById("results-filter-course");
+    const filterBookSelect = document.getElementById("results-filter-book");
+
+    const searchName = searchNameInput ? searchNameInput.value.toLowerCase().trim() : "";
+    const filterCourse = filterCourseSelect ? filterCourseSelect.value : "all";
+    const filterBook = filterBookSelect ? filterBookSelect.value : "all";
+
+    filteredStudentResults = rawStudentResults.filter(r => {
+      // 1. Filter by student name (substring search)
+      if (searchName && !r.name.toLowerCase().includes(searchName)) {
+        return false;
+      }
+      
+      // 2. Filter by course
+      if (filterCourse !== "all" && r.group !== filterCourse) {
+        return false;
+      }
+
+      // 3. Filter by subject book
+      if (filterBook !== "all" && !r.book.includes(filterBook)) {
+        return false;
+      }
+
+      return true;
+    });
+
+    renderStudentResultsTable(filteredStudentResults);
   };
 
   // Render results list in the table
@@ -1922,59 +1956,69 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Export Student Results to Excel CSV with Cyrillic BOM support
   const exportResultsToExcel = () => {
-    fetch('/api/results')
-      .then(res => {
-        if (!res.ok) throw new Error("Серверден деректер алынбады");
-        return res.json();
-      })
-      .then(results => {
-        if (results.length === 0) {
-          alert("Экспорттау үшін шәкірттердің емтихан нәтижелері табылдады!");
-          return;
-        }
+    // Export only the currently filtered results!
+    const resultsToExport = filteredStudentResults;
 
-        // CSV Headers in academic Kazakh
-        const headers = ["Шәкірттің аты-жөні", "Тобы / Курсы", "Емтихан пәні", "Балл", "Пайыздық көрсеткіш", "Тапсырған уақыты"];
-        
-        // UTF-8 BOM so Excel opens Cyrillic / Kazakh characters correctly!
-        let csvContent = "\uFEFF";
-        csvContent += headers.join(";") + "\n";
+    if (resultsToExport.length === 0) {
+      alert("Экспорттау үшін шәкірттердің емтихан нәтижелері табылмады немесе сүзгі бойынша тізім бос!");
+      return;
+    }
 
-        results.forEach(r => {
-          const row = [
-            r.name,
-            r.group,
-            r.book,
-            `${r.score} / ${r.total}`,
-            `${r.percent}%`,
-            r.date
-          ];
-          // Escape quotes
-          const escapedRow = row.map(val => `"${val.toString().replace(/"/g, '""')}"`);
-          csvContent += escapedRow.join(";") + "\n";
-        });
+    // CSV Headers in academic Kazakh
+    const headers = ["Шәкірттің аты-жөні", "Тобы / Курсы", "Емтихан пәні", "Балл", "Пайыздық көрсеткіш", "Тапсырған уақыты"];
+    
+    // UTF-8 BOM so Excel opens Cyrillic / Kazakh characters correctly!
+    let csvContent = "\uFEFF";
+    csvContent += headers.join(";") + "\n";
 
-        // Create Blob and trigger dynamic download
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        
-        link.setAttribute("href", url);
-        link.setAttribute("download", `Емтихан_Нәтижелері_${new Date().toLocaleDateString('kk-KZ')}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      })
-      .catch(err => {
-        console.error("Error exporting results:", err);
-        alert("Экспорттау кезінде қате орын алды: " + err.message);
-      });
+    // Export sorted/filtered results as shown in table (already reversed in table render, or we can just export)
+    const sorted = [...resultsToExport];
+
+    sorted.forEach(r => {
+      const row = [
+        r.name,
+        r.group,
+        r.book,
+        `${r.score} / ${r.total}`,
+        `${r.percent}%`,
+        r.date
+      ];
+      // Escape quotes
+      const escapedRow = row.map(val => `"${val.toString().replace(/"/g, '""')}"`);
+      csvContent += escapedRow.join(";") + "\n";
+    });
+
+    // Create Blob and trigger dynamic download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Емтихан_Нәтижелері_${new Date().toLocaleDateString('kk-KZ')}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const exportExcelBtn = document.getElementById("export-excel-btn");
   if (exportExcelBtn) {
     exportExcelBtn.addEventListener("click", exportResultsToExcel);
+  }
+
+  // Hook up filter inputs event listeners
+  const searchNameInput = document.getElementById("results-search-name");
+  const filterCourseSelect = document.getElementById("results-filter-course");
+  const filterBookSelect = document.getElementById("results-filter-book");
+
+  if (searchNameInput) {
+    searchNameInput.addEventListener("input", applyResultsFiltering);
+  }
+  if (filterCourseSelect) {
+    filterCourseSelect.addEventListener("change", applyResultsFiltering);
+  }
+  if (filterBookSelect) {
+    filterBookSelect.addEventListener("change", applyResultsFiltering);
   }
 
   refreshResultsBtn.addEventListener("click", loadStudentResults);

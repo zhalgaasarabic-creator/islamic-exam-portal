@@ -425,16 +425,7 @@
                 <label>Емтихан пәнін таңдаңыз:</label>
                 <div class="radio-cards-grid">
                   <label class="radio-card selected">
-                    <input type="radio" name="quiz-book" value="mix" checked>
-                    <div class="radio-card-content">
-                      <span class="card-icon"><i class="fa-solid fa-shuffle"></i></span>
-                      <h4>Аралас емтихан</h4>
-                      <p>Үш кітаптан теңдей сұрақтар жиналады</p>
-                    </div>
-                  </label>
-                  
-                  <label class="radio-card">
-                    <input type="radio" name="quiz-book" value="izhar">
+                    <input type="radio" name="quiz-book" value="izhar" checked>
                     <div class="radio-card-content">
                       <span class="card-icon"><i class="fa-solid fa-language"></i></span>
                       <h4>Изһар кітабы</h4>
@@ -680,6 +671,39 @@
               </div>
             </div>
             <hr style="border: none; height: 1px; background-color: var(--border-color); margin: 15px 0 20px 0;">
+            
+            <!-- Dynamic Sorting & Filtering Controls -->
+            <div class="results-filter-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="results-search-name" style="font-size: 12px; font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-secondary);"><i class="fa-solid fa-magnifying-glass"></i> Шәкірттің есімі бойынша іздеу:</label>
+                <input type="text" id="results-search-name" placeholder="Есімді жазыңыз..." style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background-color: var(--bg-primary); color: var(--text-main); font-size: 13px; outline: none; transition: border-color 0.2s;">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="results-filter-course" style="font-size: 12px; font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-secondary);"><i class="fa-solid fa-graduation-cap"></i> Курсы / Тобы:</label>
+                <select id="results-filter-course" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background-color: var(--bg-primary); color: var(--text-main); font-size: 13px; cursor: pointer; outline: none;">
+                  <option value="all">Барлығы</option>
+                  <option value="1-курс қыздар">1-курс қыздар</option>
+                  <option value="2-курс ұлдар">2-курс ұлдар</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="results-filter-book" style="font-size: 12px; font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-secondary);"><i class="fa-solid fa-book-open"></i> Емтихан пәні:</label>
+                <select id="results-filter-book" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background-color: var(--bg-primary); color: var(--text-main); font-size: 13px; cursor: pointer; outline: none;">
+                  <option value="all">Барлығы</option>
+                  <option value="Сарф Иззи">Сарф Иззи</option>
+                  <option value="Шарх Миәти Амил">Шарх Миәти Амил</option>
+                  <option value="Нахву Татбиқи">Нахву Татбиқи</option>
+                  <option value="Тахауи ақидасы">Тахауи ақидасы</option>
+                  <option value="Тахауи (Мәтін)">Тахауи (Мәтін)</option>
+                  <option value="Нұр әл-Идах">Нұр әл-Идах</option>
+                  <option value="Изһар кітабы">Изһар кітабы</option>
+                  <option value="Қудури кітабы">Қудури кітабы</option>
+                  <option value="Тахауи (Ақида)">Тахауи (Ақида)</option>
+                  <option value="Аралас">Аралас</option>
+                </select>
+              </div>
+            </div>
+
             <div class="results-table-container" style="overflow-x: auto; margin-top: 15px;">
               <table class="results-table" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
                 <thead>
