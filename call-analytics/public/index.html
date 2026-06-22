@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ОП Звондар Аналитикасы | Sipuni</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #2563EB;
+      --primary-dark: #1d4ed8;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --info: #0891b2;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --border: #e2e8f0;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563EB 50%, #0891b2 100%);
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 12px rgba(37,99,235,0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 36px;
+      height: 36px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .header h1 {
+      color: white;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .header-badge {
+      background: rgba(255,255,255,0.15);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .status-text {
+      color: rgba(255,255,255,0.9);
+      font-size: 13px;
+    }
+
+    /* MAIN CONTAINER */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* FILTERS */
+    .filters {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-label {
+      font-size: 13px;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .filter-input {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .filter-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+    }
+
+    .quick-filters {
+      display: flex;
+      gap: 6px;
+    }
+
+    .quick-btn {
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--text-light);
+      transition: all 0.2s;
+    }
+
+    .quick-btn:hover, .quick-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .btn-sync {
+      margin-left: auto;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-sync:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .btn-sync:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-sync .spin { animation: spin 1s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    /* KPI CARDS */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .kpi-card.blue::before { background: var(--primary); }
+    .kpi-card.green::before { background: var(--success); }
+    .kpi-card.red::before { background: var(--danger); }
+    .kpi-card.orange::before { background: var(--warning); }
+    .kpi-card.cyan::before { background: var(--info); }
+
+    .kpi-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+
+    .kpi-card.blue .kpi-icon { background: rgba(37,99,235,0.1); }
+    .kpi-card.green .kpi-icon { background: rgba(22,163,74,0.1); }
+    .kpi-card.red .kpi-icon { background: rgba(220,38,38,0.1); }
+    .kpi-card.orange .kpi-icon { background: rgba(217,119,6,0.1); }
+    .kpi-card.cyan .kpi-icon { background: rgba(8,145,178,0.1); }
+
+    .kpi-value {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .kpi-card.blue .kpi-value { color: var(--primary); }
+    .kpi-card.green .kpi-value { color: var(--success); }
+    .kpi-card.red .kpi-value { color: var(--danger); }
+    .kpi-card.orange .kpi-value { color: var(--warning); }
+    .kpi-card.cyan .kpi-value { color: var(--info); }
+
+    .kpi-label {
+      font-size: 13px;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .kpi-sub {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 6px;
+    }
+
+    /* CHARTS */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .charts-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 1100px) {
+      .charts-grid { grid-template-columns: 1fr; }
+      .charts-grid-3 { grid-template-columns: 1fr; }
+    }
+
+    .chart-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .chart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .chart-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .chart-subtitle {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 260px;
+    }
+
+    /* OPERATOR TABLE */
+    .operator-table-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .table-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .table-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background: #f8fafc;
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 12px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+
+    .operator-name {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .progress-bar {
+      background: #e2e8f0;
+      border-radius: 4px;
+      height: 6px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: var(--primary);
+      transition: width 0.5s ease;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-green { background: rgba(22,163,74,0.1); color: var(--success); }
+    .badge-red { background: rgba(220,38,38,0.1); color: var(--danger); }
+    .badge-orange { background: rgba(217,119,6,0.1); color: var(--warning); }
+
+    /* CALLS TABLE */
+    .calls-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+
+    .call-type-incoming { color: var(--success); }
+    .call-type-outgoing { color: var(--primary); }
+    .call-type-missed { color: var(--danger); }
+
+    /* LOADING */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .loading-text {
+      color: var(--text-light);
+      font-size: 14px;
+    }
+
+    /* SOURCE BADGE */
+    .source-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-light);
+    }
+
+    .source-badge {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .source-sipuni { background: rgba(37,99,235,0.1); color: var(--primary); }
+    .source-demo { background: rgba(217,119,6,0.1); color: var(--warning); }
+    .source-cache { background: rgba(22,163,74,0.1); color: var(--success); }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">📞</div>
+    <div>
+      <h1>ОП Звондар Аналитикасы</h1>
+    </div>
+    <span class="header-badge">Sipuni</span>
+  </div>
+  <div class="header-right">
+    <div class="status-dot"></div>
+    <span class="status-text" id="lastUpdate">Жүктелуде...</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <div class="filter-group">
+      <span class="filter-label">Басталу:</span>
+      <input type="date" class="filter-input" id="dateFrom">
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Аяқталу:</span>
+      <input type="date" class="filter-input" id="dateTo">
+    </div>
+    <div class="quick-filters">
+      <button class="quick-btn" onclick="setQuickPeriod(7, this)">7 күн</button>
+      <button class="quick-btn active" onclick="setQuickPeriod(30, this)">30 күн</button>
+      <button class="quick-btn" onclick="setQuickPeriod(90, this)">90 күн</button>
+    </div>
+    <div class="source-info">
+      Дерек: <span class="source-badge" id="sourceBadge">—</span>
+    </div>
+    <button class="btn-sync" onclick="loadData(true)" id="syncBtn">
+      <span id="syncIcon">🔄</span> Жаңарту
+    </button>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="kpi-grid" id="kpiGrid">
+    <div class="kpi-card blue">
+      <div class="loading" style="height:80px"><div class="loading-spinner" style="width:24px;height:24px;border-width:2px"></div></div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 1 -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Күнделікті звондар</div>
+          <div class="chart-subtitle">Кіріс / Шығыс / Жауапсыз</div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="dailyChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Звон түрлері</div>
+          <div class="chart-subtitle">Бөлінісі</div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="typeChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 2 -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Сағаттық белсенділік</div>
+          <div class="chart-subtitle">Жұмыс уақытындағы жүктеме</div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="hourChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Оператор рейтингі</div>
+          <div class="chart-subtitle">Звондар саны бойынша</div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="operatorChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPERATOR TABLE -->
+  <div class="operator-table-card">
+    <div class="table-header">
+      <div class="table-title">👤 Операторлар бойынша статистика</div>
+    </div>
+    <div id="operatorTable">
+      <div class="loading"><div class="loading-spinner"></div><span class="loading-text">Деректер жүктелуде...</span></div>
+    </div>
+  </div>
+
+  <!-- RECENT CALLS -->
+  <div class="calls-card">
+    <div class="table-header">
+      <div class="table-title">📋 Соңғы звондар</div>
+      <div style="font-size:12px;color:var(--text-light)">Соңғы 50 звон</div>
+    </div>
+    <div id="callsTable">
+      <div class="loading"><div class="loading-spinner"></div><span class="loading-text">Деректер жүктелуде...</span></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let charts = {};
+  let currentData = null;
+
+  const COLORS = {
+    incoming: '#16a34a',
+    outgoing: '#2563EB',
+    missed: '#dc2626'
+  };
+
+  const AVATAR_COLORS = ['#2563EB','#7c3aed','#db2777','#ea580c','#16a34a','#0891b2','#ca8a04'];
+
+  function getDateDaysAgo(days) {
+    const d = new Date();
+    d.setDate(d.getDate() - days);
+    return d.toISOString().split('T')[0];
+  }
+
+  function getTodayDate() {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  function formatDuration(seconds) {
+    if (!seconds || seconds === 0) return '—';
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    if (m === 0) return `${s} сек`;
+    return `${m} мин ${s} сек`;
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('kk-KZ', { day: '2-digit', month: '2-digit', year: '2-digit' });
+  }
+
+  function setQuickPeriod(days, btn) {
+    document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('dateFrom').value = getDateDaysAgo(days);
+    document.getElementById('dateTo').value = getTodayDate();
+    loadData();
+  }
+
+  function initFilters() {
+    document.getElementById('dateFrom').value = getDateDaysAgo(30);
+    document.getElementById('dateTo').value = getTodayDate();
+  }
+
+  async function loadData(refresh = false) {
+    const from = document.getElementById('dateFrom').value;
+    const to = document.getElementById('dateTo').value;
+    const btn = document.getElementById('syncBtn');
+    const icon = document.getElementById('syncIcon');
+
+    btn.disabled = true;
+    icon.className = 'spin';
+    icon.textContent = '⟳';
+
+    try {
+      const url = `/api/analytics?date_from=${from}&date_to=${to}${refresh ? '&refresh=1' : ''}`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.success) {
+        currentData = data;
+        renderKPI(data);
+        renderCharts(data);
+        renderOperatorTable(data.byOperator);
+        renderCallsTable(data.recentCalls);
+
+        const badge = document.getElementById('sourceBadge');
+        badge.className = `source-badge source-${data.source}`;
+        badge.textContent = data.source === 'sipuni' ? 'Sipuni Live' : data.source === 'demo' ? 'Demo' : 'Кэш';
+
+        document.getElementById('lastUpdate').textContent = `Жаңартылды: ${new Date().toLocaleTimeString('kk-KZ')}`;
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      btn.disabled = false;
+      icon.className = '';
+      icon.textContent = '🔄';
+    }
+  }
+
+  function renderKPI(data) {
+    const s = data.summary;
+    const kpis = [
+      { color: 'blue', icon: '📞', value: s.total.toLocaleString(), label: 'Барлық звондар', sub: `${data.dateFrom} – ${data.dateTo}` },
+      { color: 'green', icon: '📥', value: s.incoming.toLocaleString(), label: 'Кіріс звондар', sub: `${s.total > 0 ? Math.round(s.incoming/s.total*100) : 0}% үлесі` },
+      { color: 'cyan', icon: '📤', value: s.outgoing.toLocaleString(), label: 'Шығыс звондар', sub: `${s.total > 0 ? Math.round(s.outgoing/s.total*100) : 0}% үлесі` },
+      { color: 'red', icon: '📵', value: s.missed.toLocaleString(), label: 'Жауапсыз', sub: `${s.total > 0 ? Math.round(s.missed/s.total*100) : 0}% жіберілген` },
+      { color: 'orange', icon: '⏱️', value: formatDuration(s.avgDuration), label: 'Орташа ұзақтық', sub: `Жалпы: ${formatDuration(s.totalDuration)}` },
+      { color: 'green', icon: '✅', value: `${s.answerRate}%`, label: 'Жауап беру %', sub: `${s.answered} / ${s.total} звон` },
+    ];
+
+    document.getElementById('kpiGrid').innerHTML = kpis.map(k => `
+      <div class="kpi-card ${k.color}">
+        <div class="kpi-icon">${k.icon}</div>
+        <div class="kpi-value">${k.value}</div>
+        <div class="kpi-label">${k.label}</div>
+        <div class="kpi-sub">${k.sub}</div>
+      </div>
+    `).join('');
+  }
+
+  function renderCharts(data) {
+    // Daily chart
+    if (charts.daily) charts.daily.destroy();
+    const dailyCtx = document.getElementById('dailyChart').getContext('2d');
+    const labels = data.byDate.map(d => formatDate(d.date));
+    charts.daily = new Chart(dailyCtx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Кіріс', data: data.byDate.map(d => d.incoming), backgroundColor: 'rgba(22,163,74,0.8)', borderRadius: 4 },
+          { label: 'Шығыс', data: data.byDate.map(d => d.outgoing), backgroundColor: 'rgba(37,99,235,0.8)', borderRadius: 4 },
+          { label: 'Жауапсыз', data: data.byDate.map(d => d.missed), backgroundColor: 'rgba(220,38,38,0.8)', borderRadius: 4 },
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } },
+        scales: {
+          x: { stacked: true, grid: { display: false }, ticks: { maxTicksLimit: 10 } },
+          y: { stacked: true, beginAtZero: true, grid: { color: '#f1f5f9' } }
+        }
+      }
+    });
+
+    // Type donut
+    if (charts.type) charts.type.destroy();
+    const typeCtx = document.getElementById('typeChart').getContext('2d');
+    const s = data.summary;
+    charts.type = new Chart(typeCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Кіріс', 'Шығыс', 'Жауапсыз'],
+        datasets: [{ data: [s.incoming, s.outgoing, s.missed],
+          backgroundColor: ['#16a34a','#2563EB','#dc2626'],
+          borderWidth: 0, hoverOffset: 8 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' },
+          tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.raw} (${Math.round(c.raw/s.total*100)}%)` } } }
+      }
+    });
+
+    // Hour chart
+    if (charts.hour) charts.hour.destroy();
+    const hourCtx = document.getElementById('hourChart').getContext('2d');
+    const workHours = data.byHour.filter(h => h.hour >= 8 && h.hour <= 20);
+    charts.hour = new Chart(hourCtx, {
+      type: 'bar',
+      data: {
+        labels: workHours.map(h => `${h.hour}:00`),
+        datasets: [{
+          label: 'Звондар',
+          data: workHours.map(h => h.total),
+          backgroundColor: workHours.map(h => h.total === Math.max(...workHours.map(x=>x.total)) ? 'rgba(37,99,235,1)' : 'rgba(37,99,235,0.5)'),
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false } },
+          y: { beginAtZero: true, grid: { color: '#f1f5f9' } }
+        }
+      }
+    });
+
+    // Operator bar chart
+    if (charts.operator) charts.operator.destroy();
+    const opCtx = document.getElementById('operatorChart').getContext('2d');
+    const ops = data.byOperator.slice(0, 8);
+    charts.operator = new Chart(opCtx, {
+      type: 'bar',
+      data: {
+        labels: ops.map(o => o.name),
+        datasets: [{
+          label: 'Жалпы звондар',
+          data: ops.map(o => o.total),
+          backgroundColor: ops.map((_, i) => AVATAR_COLORS[i % AVATAR_COLORS.length] + 'cc'),
+          borderRadius: 6
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+          y: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  function renderOperatorTable(operators) {
+    if (!operators || operators.length === 0) {
+      document.getElementById('operatorTable').innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-light)">Деректер жоқ</div>';
+      return;
+    }
+
+    const maxTotal = Math.max(...operators.map(o => o.total));
+
+    document.getElementById('operatorTable').innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Оператор</th>
+            <th>Барлығы</th>
+            <th>Кіріс</th>
+            <th>Шығыс</th>
+            <th>Жауапсыз</th>
+            <th>Жауап %</th>
+            <th>Орт. ұзақтық</th>
+            <th>Жүктеме</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${operators.map((op, i) => `
+            <tr>
+              <td style="color:var(--text-light);font-weight:600">${i+1}</td>
+              <td>
+                <div class="operator-name">
+                  <div class="avatar" style="background:${AVATAR_COLORS[i % AVATAR_COLORS.length]}">${op.name.charAt(0)}</div>
+                  <span style="font-weight:600">${op.name}</span>
+                </div>
+              </td>
+              <td><strong>${op.total}</strong></td>
+              <td style="color:var(--success)">${op.incoming || 0}</td>
+              <td style="color:var(--primary)">${op.outgoing || 0}</td>
+              <td>
+                <span class="badge ${(op.missed||0) > 0 ? 'badge-red' : 'badge-green'}">${op.missed || 0}</span>
+              </td>
+              <td>
+                <span class="badge ${op.answerRate >= 80 ? 'badge-green' : op.answerRate >= 60 ? 'badge-orange' : 'badge-red'}">
+                  ${op.answerRate}%
+                </span>
+              </td>
+              <td>${formatDuration(op.avgDuration)}</td>
+              <td style="min-width:100px">
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width:${Math.round(op.total/maxTotal*100)}%;background:${AVATAR_COLORS[i % AVATAR_COLORS.length]}"></div>
+                </div>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function renderCallsTable(calls) {
+    if (!calls || calls.length === 0) {
+      document.getElementById('callsTable').innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-light)">Деректер жоқ</div>';
+      return;
+    }
+
+    const typeIcons = { incoming: '📥', outgoing: '📤', missed: '📵' };
+    const typeLabels = { incoming: 'Кіріс', outgoing: 'Шығыс', missed: 'Жауапсыз' };
+    const typeClasses = { incoming: 'call-type-incoming', outgoing: 'call-type-outgoing', missed: 'call-type-missed' };
+
+    document.getElementById('callsTable').innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Күн / Уақыт</th>
+            <th>Телефон</th>
+            <th>Тип</th>
+            <th>Оператор</th>
+            <th>Ұзақтық</th>
+            <th>Статус</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${calls.map(c => `
+            <tr>
+              <td>
+                <div style="font-weight:600">${formatDate(c.date)}</div>
+                <div style="font-size:11px;color:var(--text-light)">${c.time || ''}</div>
+              </td>
+              <td style="font-family:monospace;font-size:12px">${c.phone || '—'}</td>
+              <td>
+                <span class="${typeClasses[c.type] || ''}">
+                  ${typeIcons[c.type] || '📞'} ${typeLabels[c.type] || c.type}
+                </span>
+              </td>
+              <td>${c.operator || '—'}</td>
+              <td>${formatDuration(c.duration)}</td>
+              <td>
+                <span class="badge ${c.status === 'missed' || c.type === 'missed' ? 'badge-red' : 'badge-green'}">
+                  ${c.status === 'missed' || c.type === 'missed' ? 'Жауапсыз' : 'Жауапберілді'}
+                </span>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  // Инициализация
+  initFilters();
+  loadData();
+
+  // 5 минут сайын автоматты жаңарту
+  setInterval(() => loadData(), 5 * 60 * 1000);
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "call-analytics",
+  "version": "1.0.0",
+  "description": "ОП звондарына аналитика жүйесі - Sipuni интеграциясы",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "sipuni",
+    "call-analytics",
+    "dashboard"
+  ],
+  "author": "Antigravity",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^4.22.2"
+  }
+}
