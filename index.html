@@ -215,17 +215,25 @@ function parseCSV(txt){
 }
 
 async function fetchSipuni(from,to){
-  const urls=[
+  // Sipuni API эндпоинттері
+  const sipuniUrls=[
     `https://app.sipuni.com/API/statistics?key=${KEY}&type=calls&date_from=${from}&date_to=${to}&format=csv`,
     `https://app.sipuni.com/API/statistics?api_key=${KEY}&date_from=${from}&date_to=${to}&format=csv`,
     `https://stats.sipuni.com/ru_RU/statistic/export?hash=${HASH}&date_from=${from}&date_to=${to}&format=csv`,
   ];
-  for(const u of urls){
+  // CORS proxy арқылы байқау (corsproxy.io — тегін, ашық)
+  const proxies=['https://corsproxy.io/?','https://api.allorigins.win/raw?url='];
+  const allUrls=[
+    ...sipuniUrls, // алдымен тікелей (егер CORS рұқсат берсе)
+    ...proxies.map(p=>`${p}${encodeURIComponent(sipuniUrls[0])}`),
+    ...proxies.map(p=>`${p}${encodeURIComponent(sipuniUrls[2])}`),
+  ];
+  for(const u of allUrls){
     try{
-      const res=await fetch(u,{mode:'cors',cache:'no-cache'});
+      const res=await fetch(u,{cache:'no-cache'});
       if(res.ok){
         const txt=await res.text();
-        if(txt&&txt.length>50&&!txt.includes('<!DOCTYPE')){
+        if(txt&&txt.length>50&&!txt.includes('<!DOCTYPE')&&!txt.includes('<html')){
           const c=parseCSV(txt);if(c.length>0)return{calls:c,source:'sipuni'};
         }
       }
