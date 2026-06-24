@@ -73,6 +73,19 @@
     .badge { display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600; }
     .badge-green{background:rgba(22,163,74,0.1);color:var(--success);} .badge-red{background:rgba(220,38,38,0.1);color:var(--danger);} .badge-orange{background:rgba(217,119,6,0.1);color:var(--warning);}
     .ct-in{color:var(--success);} .ct-out{color:var(--primary);} .ct-miss{color:var(--danger);}
+    .csv-upload-box { border:2px dashed var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:white;cursor:pointer;transition:border-color 0.2s; }
+    .csv-upload-box:hover{border-color:var(--primary);}
+    .csv-upload-box.drag{border-color:var(--primary);background:rgba(37,99,235,0.03);}
+    .csv-upload-icon{font-size:28px;}
+    .csv-upload-text{flex:1;}
+    .csv-upload-text strong{display:block;font-size:14px;color:var(--text);}
+    .csv-upload-text span{font-size:12px;color:var(--text-light);}
+    .btn-upload{background:white;border:1px solid var(--primary);color:var(--primary);padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+    .btn-upload:hover{background:var(--primary);color:white;}
+    .csv-instructions{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:#1e40af;}
+    .csv-instructions ol{margin:8px 0 0 18px;}
+    .csv-instructions li{margin-bottom:4px;}
+    .csv-instructions a{color:var(--primary);font-weight:600;}
   </style>
 </head>
 <body>
@@ -88,8 +101,30 @@
   </div>
 </div>
 <div class="container">
-  <div class="info-banner demo-banner" id="demoBanner" style="display:none">⚠️ <strong>Demo режим:</strong> Sipuni API-ге CORS рұқсаты жоқ. Demo деректер көрсетілуде.</div>
-  <div class="info-banner live-banner" id="liveBanner" style="display:none">✅ <strong>Live режим:</strong> Sipuni-ден нақты деректер жүктелді.</div>
+  <div class="info-banner demo-banner" id="demoBanner" style="display:none">⚠️ <strong>Demo режим:</strong> Нақты деректер жоқ. Төмендегі нұсқаулық бойынша CSV жүктеңіз.</div>
+  <div class="info-banner live-banner" id="liveBanner" style="display:none">✅ <strong>Live режим:</strong> Sipuni деректері сәтті жүктелді.</div>
+
+  <!-- CSV НҰСҚАУЛЫҒЫ -->
+  <div class="csv-instructions" id="csvInstructions">
+    <strong>📋 Нақты деректер алу үшін:</strong>
+    <ol>
+      <li><a href="https://stats.sipuni.com/ru_RU/statistic?hash=9256a87b61d9a6dcf738e2cc838f1e38" target="_blank">stats.sipuni.com</a> сайтына кіріңіз</li>
+      <li>Керекті мерзімді таңдаңыз → <strong>Экспорт → CSV</strong> батырмасын басыңыз</li>
+      <li>Жүктелген CSV файлды төмендегі аймаққа апарып тастаңыз немесе таңдаңыз</li>
+    </ol>
+  </div>
+
+  <!-- CSV ЖҮКТЕУ АЙМАҒЫ -->
+  <div class="csv-upload-box" id="csvDropZone" onclick="document.getElementById('csvFileInput').click()">
+    <div class="csv-upload-icon">📂</div>
+    <div class="csv-upload-text">
+      <strong id="csvFileName">Sipuni CSV файлын осы жерге апарыңыз немесе таңдаңыз</strong>
+      <span>Sipuni экспорт форматы қолдаурылады (.csv)</span>
+    </div>
+    <button class="btn-upload" onclick="event.stopPropagation();document.getElementById('csvFileInput').click()">Файл таңдау</button>
+    <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleCSVFile(this.files[0])">
+  </div>
+
   <div class="filters">
     <div class="filter-group"><span class="filter-label">Басталу:</span><input type="date" class="filter-input" id="dateFrom"></div>
     <div class="filter-group"><span class="filter-label">Аяқталу:</span><input type="date" class="filter-input" id="dateTo"></div>
@@ -114,9 +149,36 @@
 </div>
 <script>
 const KEY='0.seqs3t071cd', HASH='9256a87b61d9a6dcf738e2cc838f1e38';
-let CH={};
+let CH={}, loadedCalls=null;
 const CLR=['#2563EB','#7c3aed','#db2777','#ea580c','#16a34a','#0891b2','#ca8a04'];
 const today=()=>new Date().toISOString().split('T')[0];
+
+// CSV файл drag-and-drop
+const dz=document.getElementById('csvDropZone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');const f=e.dataTransfer.files[0];if(f)handleCSVFile(f);});
+
+function handleCSVFile(file){
+  if(!file||!file.name.endsWith('.csv')){alert('CSV файл таңдаңыз!');return;}
+  document.getElementById('csvFileName').textContent='⏳ Жүктелуде: '+file.name;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const calls=parseCSV(e.target.result);
+    if(calls.length===0){alert('CSV файлда деректер табылмады. Sipuni форматын тексеріңіз.');document.getElementById('csvFileName').textContent='Sipuni CSV файлын осы жерге апарыңыз немесе таңдаңыз';return;}
+    loadedCalls=calls;
+    document.getElementById('csvFileName').textContent='✅ '+file.name+' ('+calls.length+' жазба)';
+    document.getElementById('csvInstructions').style.display='none';
+    document.getElementById('demoBanner').style.display='none';
+    document.getElementById('liveBanner').style.display='flex';
+    document.getElementById('liveBanner').innerHTML='✅ <strong>CSV жүктелді:</strong> '+calls.length+' звон табылды — '+file.name;
+    // Күн аралығын CSV-ден автоматты анықтау
+    const dates=calls.map(c=>c.date).filter(Boolean).sort();
+    if(dates.length){document.getElementById('dateFrom').value=dates[0];document.getElementById('dateTo').value=dates[dates.length-1];}
+    renderAll(calls,'csv');
+  };
+  reader.readAsText(file,'UTF-8');
+}
 const daysAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().split('T')[0];};
 const fmtDur=s=>{if(!s)return'—';const m=Math.floor(s/60),r=s%60;return m?`${m} мин ${r} сек`:`${r} сек`;};
 const fmtDate=ds=>{if(!ds)return'—';return new Date(ds).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'2-digit'});};
@@ -226,17 +288,25 @@ function analytics(calls){
 
 function setQ(days,btn){document.querySelectorAll('.quick-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('dateFrom').value=daysAgo(days);document.getElementById('dateTo').value=today();loadData();}
 
+function renderAll(calls,src){
+  const from=document.getElementById('dateFrom').value,to=document.getElementById('dateTo').value;
+  const d=analytics(calls);
+  renderKPI(d,from,to);renderCharts(d);renderOpTable(d.byOp);renderCallTable(d.recent);
+  const labels={csv:'📄 CSV файлынан',sipuni:'🟢 Sipuni Live',demo:'🟡 Demo'};
+  document.getElementById('lastUpdate').textContent=`Жаңартылды: ${new Date().toLocaleTimeString('kk-KZ')} | ${labels[src]||src}`;
+}
+
 async function loadData(){
+  // CSV жүктелген болса — соны қолдан, жаңа сүзгімен қайта есепте
+  if(loadedCalls){renderAll(loadedCalls,'csv');return;}
   const from=document.getElementById('dateFrom').value,to=document.getElementById('dateTo').value;
   const si=document.getElementById('si');si.className='spin';si.textContent='⟳';
   let calls=null,src='demo';
   try{const r=await fetchSipuni(from,to);if(r){calls=r.calls;src=r.source;}}catch(e){}
   if(!calls||!calls.length){calls=genDemo(from,to);src='demo';}
   document.getElementById('demoBanner').style.display=src==='demo'?'flex':'none';
-  document.getElementById('liveBanner').style.display=src==='sipuni'?'flex':'none';
-  const d=analytics(calls);
-  renderKPI(d,from,to);renderCharts(d);renderOpTable(d.byOp);renderCallTable(d.recent);
-  document.getElementById('lastUpdate').textContent=`Жаңартылды: ${new Date().toLocaleTimeString('kk-KZ')} | ${src==='sipuni'?'🟢 Sipuni Live':'🟡 Demo'}`;
+  document.getElementById('liveBanner').style.display=src!=='demo'?'flex':'none';
+  renderAll(calls,src);
   si.className='';si.textContent='🔄';
 }
 
