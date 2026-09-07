@@ -44,11 +44,12 @@
     position:absolute;inset:0;
     display:flex;
     align-items:center;
-    padding:clamp(28px,6vw,88px) clamp(28px,8vw,120px);
+    padding:clamp(24px,5.2vw,80px) clamp(26px,7.5vw,110px);
     opacity:0;
     transform:translateY(22px) scale(.985);
     transition:opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
     pointer-events:none;
+    overflow:hidden;
   }
   .slide.active{opacity:1;transform:none;pointer-events:auto;z-index:2;}
   @media (prefers-reduced-motion:reduce){
@@ -89,130 +90,161 @@
 
   /* ---------- typography ---------- */
   .kicker{
-    font-size:.75rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+    font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
     color:var(--accent, var(--gold));
-    margin-bottom:1.4rem;
+    margin-bottom:1.15rem;
   }
   .display{
-    font-size:clamp(3rem,7.2vw,6.4rem);
+    font-size:clamp(2.8rem,6.8vw,6rem);
     font-weight:800;letter-spacing:-.03em;line-height:1.02;
   }
   .headline{
-    font-size:clamp(2.1rem,4.6vw,3.7rem);
-    font-weight:800;letter-spacing:-.02em;line-height:1.06;
-    max-width:16ch;
+    font-size:clamp(1.9rem,3.9vw,3.15rem);
+    font-weight:800;letter-spacing:-.02em;line-height:1.08;
+    max-width:19ch;
   }
   .lede{
-    font-size:clamp(1.15rem,1.9vw,1.55rem);
+    font-size:clamp(1.05rem,1.7vw,1.35rem);
     font-weight:400;line-height:1.5;
     color:var(--ink-soft);
-    max-width:46ch;margin-top:1.5rem;
+    max-width:50ch;margin-top:1.2rem;
   }
   .slide.dark .lede{color:var(--mist-soft);}
   .body-text{
-    font-size:1.05rem;line-height:1.65;font-weight:400;
+    font-size:.98rem;line-height:1.6;font-weight:400;
     color:var(--ink-soft);max-width:44ch;
   }
   .slide.dark .body-text{color:var(--mist-soft);}
   .tag{
     display:inline-flex;align-items:center;gap:.5em;
-    font-size:.8125rem;font-weight:600;letter-spacing:.03em;font-style:italic;
+    font-size:.8rem;font-weight:600;letter-spacing:.03em;font-style:italic;
     color:var(--accent, var(--gold));
-    margin-top:1rem;
+    margin-top:.85rem;
   }
+  .critique{
+    margin-top:.85rem;font-size:.82rem;line-height:1.5;font-style:italic;
+    color:var(--mist-soft);opacity:.85;max-width:42ch;
+  }
+  .critique b{color:var(--accent);font-style:normal;font-weight:700;opacity:1;}
 
   /* ---------- title / closing slides ---------- */
-  .cover .display{margin-top:.4rem;}
-  .cover .lede{margin-top:1.8rem;}
+  .cover .display{margin-top:.3rem;}
+  .cover .lede{margin-top:1.5rem;}
   .cover-footer{
-    margin-top:clamp(2.5rem,6vw,4.5rem);
-    display:flex;align-items:center;gap:1rem;
-    font-size:.8125rem;color:var(--mist-soft);
+    margin-top:clamp(1.8rem,4.5vw,3rem);
+    display:flex;align-items:center;gap:1rem;flex-wrap:wrap;
+    font-size:.8rem;color:var(--mist-soft);
   }
-  .cover-footer .dot-sep{width:4px;height:4px;border-radius:50%;background:var(--mist-soft);}
+  .cover-footer .dot-sep{width:4px;height:4px;border-radius:50%;background:var(--mist-soft);flex-shrink:0;}
   .hint{
-    position:absolute;left:0;right:0;bottom:clamp(28px,6vw,64px);
+    position:absolute;left:0;right:0;bottom:clamp(20px,4.5vw,48px);
     display:flex;align-items:center;gap:.6rem;
-    font-size:.8125rem;font-weight:600;letter-spacing:.03em;color:var(--mist-soft);
+    font-size:.8rem;font-weight:600;letter-spacing:.03em;color:var(--mist-soft);
   }
   .hint svg{width:16px;height:16px;animation:nudge 1.6s var(--ease) infinite;}
   @media (prefers-reduced-motion:reduce){.hint svg{animation:none;}}
   @keyframes nudge{0%,100%{transform:translateX(0);}50%{transform:translateX(6px);}}
 
-  /* ---------- tiles grid (scope / methods) ---------- */
-  .tiles{
-    display:grid;gap:1.1rem;margin-top:2.4rem;
-  }
+  /* ---------- tiles grid ---------- */
+  .tiles{display:grid;gap:.9rem;margin-top:1.7rem;}
   .tiles.cols-2{grid-template-columns:repeat(2,1fr);}
   .tiles.cols-3{grid-template-columns:repeat(3,1fr);}
+  .tiles.cols-4{grid-template-columns:repeat(4,1fr);}
   .tile{
     background:var(--paper-alt);
     border:1px solid var(--line-light);
     border-radius:var(--radius-lg);
-    padding:1.7rem 1.8rem;
+    padding:1.35rem 1.5rem;
   }
   .slide.dark .tile{
     background:rgba(241,239,234,.05);
     border-color:var(--line-dark);
     backdrop-filter:blur(16px);
   }
-  .tile h3{font-size:1.15rem;font-weight:700;letter-spacing:-.01em;margin-bottom:.55rem;}
-  .tile p{font-size:.95rem;line-height:1.55;color:var(--ink-soft);}
+  .tile h3{font-size:1.05rem;font-weight:700;letter-spacing:-.01em;margin-bottom:.45rem;}
+  .tile p{font-size:.88rem;line-height:1.5;color:var(--ink-soft);}
   .slide.dark .tile p{color:var(--mist-soft);}
+  .tile.small{padding:1.05rem 1.2rem;}
+  .tile.small h3{
+    font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;
+    color:var(--accent,var(--gold));margin-bottom:.4rem;
+  }
+  .tile.small p{font-size:.83rem;}
 
   /* ---------- timeline ---------- */
-  .timeline{
-    position:relative;margin-top:3rem;
-    display:flex;justify-content:space-between;gap:1.5rem;
-  }
-  .timeline::before{
-    content:"";position:absolute;top:7px;left:0;right:0;height:1px;
-    background:var(--line-dark);
-  }
-  .t-node{flex:1;position:relative;padding-top:2.4rem;}
+  .timeline{position:relative;margin-top:2.4rem;display:flex;justify-content:space-between;gap:1.3rem;}
+  .timeline::before{content:"";position:absolute;top:7px;left:0;right:0;height:1px;background:var(--line-dark);}
+  .t-node{flex:1;position:relative;padding-top:2.2rem;}
   .t-node::before{
-    content:"";position:absolute;top:0;left:0;width:15px;height:15px;border-radius:50%;
+    content:"";position:absolute;top:0;left:0;width:14px;height:14px;border-radius:50%;
     background:var(--void);border:2px solid var(--node-color,var(--gold));
   }
-  .t-year{font-size:.85rem;font-weight:700;letter-spacing:.03em;color:var(--node-color,var(--gold));font-variant-numeric:tabular-nums;}
-  .t-title{font-size:1.15rem;font-weight:700;margin-top:.4rem;letter-spacing:-.01em;}
-  .t-desc{font-size:.875rem;line-height:1.5;color:var(--mist-soft);margin-top:.5rem;max-width:24ch;}
+  .t-year{font-size:.8rem;font-weight:700;letter-spacing:.02em;color:var(--node-color,var(--gold));font-variant-numeric:tabular-nums;}
+  .t-title{font-size:1.05rem;font-weight:700;margin-top:.35rem;letter-spacing:-.01em;}
+  .t-desc{font-size:.82rem;line-height:1.45;color:var(--mist-soft);margin-top:.45rem;max-width:22ch;}
 
   /* ---------- theorist layout ---------- */
-  .thinker{display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(2rem,5vw,5rem);align-items:center;}
-  .thinker-name{font-size:clamp(2rem,4vw,3.1rem);font-weight:800;letter-spacing:-.02em;line-height:1.05;margin-top:.3rem;}
+  .thinker{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(1.6rem,4vw,4rem);align-items:center;}
+  .thinker-name{font-size:clamp(1.7rem,3.4vw,2.7rem);font-weight:800;letter-spacing:-.02em;line-height:1.05;margin-top:.25rem;}
   .thinker-concept{
-    font-size:clamp(2.4rem,5vw,3.6rem);font-weight:800;letter-spacing:-.02em;
+    font-size:clamp(2rem,4.2vw,3.1rem);font-weight:800;letter-spacing:-.02em;
     color:var(--accent);line-height:1.05;
   }
 
-  /* ---------- significance rows ---------- */
+  /* ---------- roster (theorist overview) ---------- */
+  .roster{display:grid;grid-template-columns:repeat(4,1fr);gap:.85rem;margin-top:2.2rem;}
+  .roster-card{border:1px solid var(--line-dark);border-radius:var(--radius-sm);padding:1rem 1.1rem;background:rgba(241,239,234,.04);}
+  .rc-name{font-weight:700;font-size:.92rem;letter-spacing:-.005em;}
+  .rc-years{font-size:.72rem;color:var(--mist-soft);margin-top:.15rem;font-variant-numeric:tabular-nums;}
+  .rc-concept{font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-top:.65rem;color:var(--rc,var(--gold));}
+
+  /* ---------- table of contents ---------- */
+  .toc-list{columns:2;column-gap:3rem;margin-top:2rem;}
+  .toc-item{display:flex;align-items:baseline;gap:.85rem;padding:.55rem 0;border-bottom:1px solid var(--line-light);break-inside:avoid;}
+  .toc-num{font-size:.8rem;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums;flex-shrink:0;width:1.5em;}
+  .toc-title{font-size:.95rem;font-weight:500;}
+
+  /* ---------- comparison table ---------- */
+  .compare{margin-top:1.9rem;border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--line-light);}
+  .compare-row{display:grid;grid-template-columns:1fr 1.7fr;gap:1.4rem;padding:1rem 1.5rem;border-bottom:1px solid var(--line-light);align-items:center;}
+  .compare-row:last-child{border-bottom:none;background:rgba(176,138,60,.1);}
+  .compare-row:last-child .compare-field{color:var(--gold);}
+  .compare-field{font-weight:700;font-size:.92rem;}
+  .compare-desc{font-size:.87rem;color:var(--ink-soft);}
+
+  /* ---------- bibliography ---------- */
+  .biblio{margin-top:1.9rem;display:flex;flex-direction:column;}
+  .biblio-item{display:grid;grid-template-columns:70px 1fr;gap:1.2rem;padding:.68rem 0;border-bottom:1px solid var(--line-light);align-items:baseline;}
+  .biblio-item:last-child{border-bottom:none;}
+  .biblio-year{font-weight:700;font-variant-numeric:tabular-nums;color:var(--gold);font-size:.88rem;}
+  .biblio-text{font-size:.88rem;color:var(--ink-soft);}
+  .biblio-text em{font-style:italic;color:var(--ink);}
+  .biblio-text b{color:var(--ink);font-weight:600;}
+
+  /* ---------- significance / questions rows ---------- */
   .sig-row{
-    display:grid;grid-template-columns:280px 1fr;gap:2.5rem;
-    padding:1.4rem 0;border-top:1px solid var(--line-light);
+    display:grid;grid-template-columns:230px 1fr;gap:2rem;
+    padding:1.05rem 0;border-top:1px solid var(--line-light);
     align-items:baseline;
   }
   .sig-row:last-child{border-bottom:1px solid var(--line-light);}
-  .sig-word{font-size:clamp(1.6rem,2.6vw,2.1rem);font-weight:800;letter-spacing:-.02em;color:var(--gold);}
-  .sig-text{font-size:1.02rem;line-height:1.6;color:var(--ink-soft);}
+  .sig-word{font-size:clamp(1.35rem,2.2vw,1.8rem);font-weight:800;letter-spacing:-.02em;color:var(--gold);}
+  .sig-text{font-size:.92rem;line-height:1.55;color:var(--ink-soft);}
 
   /* ---------- chrome / nav ---------- */
   .progress-rail{position:fixed;top:0;left:0;right:0;height:3px;background:rgba(128,128,140,.22);z-index:30;}
   .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--rose));transition:width .5s var(--ease);}
 
-  .chip{
-    background:var(--chip-bg);border:1px solid var(--chip-border);
-    backdrop-filter:blur(14px);color:var(--mist);
-  }
+  .chip{background:var(--chip-bg);border:1px solid var(--chip-border);backdrop-filter:blur(14px);color:var(--mist);}
   .slide-counter{
-    position:fixed;top:22px;right:24px;z-index:30;
-    padding:.5rem .9rem;border-radius:999px;
-    font-size:.75rem;font-weight:700;letter-spacing:.06em;
+    position:fixed;top:20px;right:22px;z-index:30;
+    padding:.45rem .85rem;border-radius:999px;
+    font-size:.72rem;font-weight:700;letter-spacing:.06em;
     font-variant-numeric:tabular-nums;
   }
   .nav-btn{
     position:fixed;top:50%;transform:translateY(-50%);z-index:30;
-    width:46px;height:46px;border-radius:50%;border:1px solid var(--chip-border);
+    width:44px;height:44px;border-radius:50%;border:1px solid var(--chip-border);
     display:flex;align-items:center;justify-content:center;cursor:pointer;
     background:var(--chip-bg);backdrop-filter:blur(14px);
     transition:opacity .3s var(--ease),transform .2s var(--ease);
@@ -221,34 +253,37 @@
   .nav-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
   .nav-btn svg{width:18px;height:18px;stroke:var(--mist);}
   .nav-btn[disabled]{opacity:.25;pointer-events:none;}
-  .nav-prev{left:20px;}
-  .nav-next{right:20px;}
+  .nav-prev{left:18px;}
+  .nav-next{right:18px;}
 
   .dots{
-    position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:30;
-    display:flex;align-items:center;gap:8px;
-    padding:.5rem .7rem;border-radius:999px;
+    position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:30;
+    display:flex;align-items:center;gap:6px;max-width:min(90vw,640px);
+    padding:.45rem .65rem;border-radius:999px;overflow-x:auto;
   }
   .dot{
-    width:7px;height:7px;border-radius:50%;border:none;padding:0;cursor:pointer;
+    width:6px;height:6px;border-radius:50%;border:none;padding:0;cursor:pointer;flex-shrink:0;
     background:rgba(241,239,234,.32);transition:all .3s var(--ease);
   }
   .dot:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
-  .dot.active{width:20px;border-radius:5px;background:var(--gold);}
+  .dot.active{width:18px;border-radius:5px;background:var(--gold);}
 
   @media (max-width:760px){
-    .tiles.cols-2,.tiles.cols-3{grid-template-columns:1fr;}
-    .thinker{grid-template-columns:1fr;gap:1.5rem;}
-    .timeline{flex-direction:column;gap:1.8rem;}
+    .tiles.cols-2,.tiles.cols-3,.tiles.cols-4{grid-template-columns:1fr;}
+    .thinker{grid-template-columns:1fr;gap:1.2rem;}
+    .timeline{flex-direction:column;gap:1.5rem;}
     .timeline::before{display:none;}
-    .sig-row{grid-template-columns:1fr;gap:.5rem;}
-    .nav-btn{width:38px;height:38px;}
+    .sig-row,.compare-row{grid-template-columns:1fr;gap:.4rem;}
+    .toc-list{columns:1;}
+    .roster{grid-template-columns:repeat(2,1fr);}
+    .nav-btn{width:36px;height:36px;}
+    .slide{overflow-y:auto;}
   }
 </style>
 
 <div class="deck" id="deck">
   <div class="progress-rail"><div class="progress-fill" id="progressFill"></div></div>
-  <div class="slide-counter chip" id="slideCounter">01 / 14</div>
+  <div class="slide-counter chip" id="slideCounter">01 / 01</div>
   <button class="nav-btn nav-prev chip" id="prevBtn" aria-label="Алдыңғы слайд">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
   </button>
@@ -257,16 +292,18 @@
   </button>
 
   <!-- 1 — TITLE -->
-  <section class="slide dark cover accent-gold active" data-index="0" aria-label="Слайд 1: Титул">
+  <section class="slide dark cover accent-gold active" aria-label="Слайд: Титул">
     <div class="glow"></div><div class="rings"></div>
     <div class="slide-inner">
       <p class="kicker">Антропология дәрісі</p>
       <h1 class="display">Дін<br>антропологиясы</h1>
-      <p class="lede">Сенім жүйелерін, ғұрыптарды және қасиетті мағынаны мәдениет призмасы арқылы зерттеу</p>
+      <p class="lede">Сенім жүйелерін, ғұрыптарды және қасиетті мағынаны мәдениет призмасы арқылы зерттейтін ғылыми пән</p>
       <div class="cover-footer">
         <span>Дінтану және мәдениеттану кафедрасы</span>
         <span class="dot-sep"></span>
-        <span>14 слайд</span>
+        <span>Кіріспе дәріс</span>
+        <span class="dot-sep"></span>
+        <span id="slideCountLabel">23 слайд</span>
       </div>
     </div>
     <div class="hint">
@@ -275,18 +312,45 @@
     </div>
   </section>
 
-  <!-- 2 — DEFINITION -->
-  <section class="slide light" data-index="1" aria-label="Слайд 2: Анықтама">
+  <!-- 2 — AGENDA -->
+  <section class="slide light" aria-label="Слайд: Дәріс жоспары">
+    <div class="slide-inner">
+      <p class="kicker">Дәріс жоспары</p>
+      <h2 class="headline" style="max-width:none;">Бүгін не талдаймыз</h2>
+      <div class="toc-list">
+        <div class="toc-item"><span class="toc-num">01</span><span class="toc-title">Анықтама</span></div>
+        <div class="toc-item"><span class="toc-num">02</span><span class="toc-title">Зерттеу нысаны</span></div>
+        <div class="toc-item"><span class="toc-num">03</span><span class="toc-title">Пәндермен байланысы</span></div>
+        <div class="toc-item"><span class="toc-num">04</span><span class="toc-title">Қалыптасу тарихы</span></div>
+        <div class="toc-item"><span class="toc-num">05</span><span class="toc-title">Классикалық теоретиктер</span></div>
+        <div class="toc-item"><span class="toc-num">06</span><span class="toc-title">Негізгі ұғымдар</span></div>
+        <div class="toc-item"><span class="toc-num">07</span><span class="toc-title">Өту ғұрыптары мен лиминалдылық</span></div>
+        <div class="toc-item"><span class="toc-num">08</span><span class="toc-title">Зерттеу әдістері мен этика</span></div>
+        <div class="toc-item"><span class="toc-num">09</span><span class="toc-title">Сыни көзқарас</span></div>
+        <div class="toc-item"><span class="toc-num">10</span><span class="toc-title">Қазіргі бағыттар</span></div>
+        <div class="toc-item"><span class="toc-num">11</span><span class="toc-title">Маңыздылығы</span></div>
+        <div class="toc-item"><span class="toc-num">12</span><span class="toc-title">Ұсынылатын әдебиеттер</span></div>
+        <div class="toc-item"><span class="toc-num">13</span><span class="toc-title">Семинарға сұрақтар</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 — DEFINITION -->
+  <section class="slide light" aria-label="Слайд: Анықтама">
     <div class="slide-inner">
       <p class="kicker">01 · Анықтама</p>
       <h2 class="headline">Дін антропологиясы дегеніміз не?</h2>
       <p class="lede">Адамдардың қасиетті деп санайтын нәрселерін, оны білдіретін ғұрыптар мен наным-сенімдерді және бұлардың қоғам өмірін қалай құрайтынын зерттейтін мәдени антропологияның саласы.</p>
-      <p class="body-text" style="margin-top:1.2rem;">Ол дінді ақиқат па, жалған ба деп бағаламайды — оның орнына адамдар үшін нендей мағына беретінін және қоғамдық өмірде қандай қызмет атқаратынын түсінуге тырысады.</p>
+      <p class="body-text" style="margin-top:1.1rem;">Пән дінді ақиқат па, жалған ба деп бағаламайды («методологиялық агностицизм» қағидасы) — оның орнына адамдар үшін нендей мағына беретінін және қоғамдық өмірде қандай қызмет атқаратынын түсінуге тырысады.</p>
+      <div class="tiles cols-2" style="margin-top:1.5rem;max-width:640px;">
+        <div class="tile small"><h3>Э. Тайлор, 1871</h3><p>«Дін — рухани болмыстарға деген сенім» (минималды анықтама)</p></div>
+        <div class="tile small"><h3>К. Гирц, 1973</h3><p>Дін — символдар арқылы көңіл-күй мен уәж қалыптастыратын мәдени жүйе</p></div>
+      </div>
     </div>
   </section>
 
-  <!-- 3 — SCOPE -->
-  <section class="slide light" data-index="2" aria-label="Слайд 3: Зерттеу нысаны">
+  <!-- 4 — SCOPE -->
+  <section class="slide light" aria-label="Слайд: Зерттеу нысаны">
     <div class="slide-inner">
       <p class="kicker">02 · Зерттеу нысаны</p>
       <h2 class="headline">Не зерттейді?</h2>
@@ -299,23 +363,57 @@
     </div>
   </section>
 
-  <!-- 4 — TIMELINE -->
-  <section class="slide dark accent-gold" data-index="3" aria-label="Слайд 4: Қалыптасу тарихы">
-    <div class="glow"></div>
+  <!-- 5 — DISCIPLINARY COMPARISON -->
+  <section class="slide light" aria-label="Слайд: Пәндермен байланысы">
     <div class="slide-inner">
-      <p class="kicker">03 · Қалыптасу тарихы</p>
-      <h2 class="headline" style="max-width:none;">Ғылым ретінде даму жолы</h2>
-      <div class="timeline">
-        <div class="t-node" style="--node-color:var(--gold);"><div class="t-year">1870-ж.</div><div class="t-title">Эволюционизм</div><div class="t-desc">Дін қарапайымнан күрделіге қарай дамиды (Тайлор, Фрэзер).</div></div>
-        <div class="t-node" style="--node-color:var(--indigo);"><div class="t-year">1910-ж.</div><div class="t-title">Функционализм</div><div class="t-desc">Дін қоғамдық тәртіп пен ынтымақтастықты қолдайды (Дюркгейм, Малиновский).</div></div>
-        <div class="t-node" style="--node-color:var(--rose);"><div class="t-year">1960-ж.</div><div class="t-title">Структурализм</div><div class="t-desc">Мифтердің астарындағы ортақ логикалық құрылымдар (Леви-Стросс).</div></div>
-        <div class="t-node" style="--node-color:var(--sage);"><div class="t-year">Қазіргі кезең</div><div class="t-title">Символдық антропология</div><div class="t-desc">Дін — мағына мен таңбалардан тұратын мәдени жүйе (Гирц, Элиаде).</div></div>
+      <p class="kicker">03 · Пәндермен байланысы</p>
+      <h2 class="headline" style="max-width:none;">Дінтану антропологиясы қай жерде тұр?</h2>
+      <div class="compare">
+        <div class="compare-row"><div class="compare-field">Дінтану</div><div class="compare-desc">Діни ілімдердің мазмұны мен тарихи дамуын салыстырмалы түрде зерттейді</div></div>
+        <div class="compare-row"><div class="compare-field">Социология</div><div class="compare-desc">Дінді әлеуметтік институт, ұйым және қоғамдық құрылым ретінде қарастырады</div></div>
+        <div class="compare-row"><div class="compare-field">Психология</div><div class="compare-desc">Жеке адамның ішкі діни тәжірибесі мен сенім механизмін зерттейді</div></div>
+        <div class="compare-row"><div class="compare-field">Тарих</div><div class="compare-desc">Діни оқиғалар мен институттардың уақыт өтуімен өзгеруін баяндайды</div></div>
+        <div class="compare-row"><div class="compare-field">Дін антропологиясы</div><div class="compare-desc">Дінді мәдениет ішінде, ұзақ дала жұмысы арқылы, күнделікті өмір тәжірибесінде зерттейді</div></div>
       </div>
     </div>
   </section>
 
-  <!-- 5 — TYLOR -->
-  <section class="slide dark accent-gold" data-index="4" aria-label="Слайд 5: Эдвард Тайлор">
+  <!-- 6 — TIMELINE -->
+  <section class="slide dark accent-gold" aria-label="Слайд: Қалыптасу тарихы">
+    <div class="glow"></div>
+    <div class="slide-inner">
+      <p class="kicker">04 · Қалыптасу тарихы</p>
+      <h2 class="headline" style="max-width:none;">Ғылым ретінде даму жолы</h2>
+      <div class="timeline">
+        <div class="t-node" style="--node-color:var(--gold);"><div class="t-year">1870-ж.</div><div class="t-title">Эволюционизм</div><div class="t-desc">Дін қарапайымнан күрделіге қарай дамиды (Тайлор, Фрэзер).</div></div>
+        <div class="t-node" style="--node-color:var(--indigo);"><div class="t-year">1910-ж.</div><div class="t-title">Функционализм</div><div class="t-desc">Дін қоғамдық тәртіп пен ынтымақтастықты қолдайды (Дюркгейм, Малиновский).</div></div>
+        <div class="t-node" style="--node-color:var(--rose);"><div class="t-year">1960-ж.</div><div class="t-title">Структурализм</div><div class="t-desc">Мифтердің астарындағы ортақ логикалық құрылымдар (Леви-Стросс, Тэрнер).</div></div>
+        <div class="t-node" style="--node-color:var(--sage);"><div class="t-year">1970-ж.</div><div class="t-title">Символдық антропология</div><div class="t-desc">Дін — мағына мен таңбалардан тұратын мәдени жүйе (Гирц, Элиаде).</div></div>
+        <div class="t-node" style="--node-color:var(--mist);"><div class="t-year">Қазіргі кезең</div><div class="t-title">Когнитивті және рефлексивті бетбұрыс</div><div class="t-desc">Сенімнің танымдық негіздері және зерттеуші позициясын сынау.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 — ROSTER -->
+  <section class="slide dark accent-gold" aria-label="Слайд: Жеті теоретик">
+    <div class="glow"></div>
+    <div class="slide-inner">
+      <p class="kicker">05 · Классикалық теоретиктер</p>
+      <h2 class="headline" style="max-width:none;">Пәнді қалыптастырған жеті есім</h2>
+      <div class="roster">
+        <div class="roster-card"><div class="rc-name">Э. Тайлор</div><div class="rc-years">1832–1917</div><div class="rc-concept" style="--rc:var(--gold);">Анимизм</div></div>
+        <div class="roster-card"><div class="rc-name">Дж. Фрэзер</div><div class="rc-years">1854–1941</div><div class="rc-concept" style="--rc:var(--indigo);">Магия мен дін</div></div>
+        <div class="roster-card"><div class="rc-name">Э. Дюркгейм</div><div class="rc-years">1858–1917</div><div class="rc-concept" style="--rc:var(--rose);">Қасиетті/дүниелік</div></div>
+        <div class="roster-card"><div class="rc-name">Б. Малиновский</div><div class="rc-years">1884–1942</div><div class="rc-concept" style="--rc:var(--sage);">Функционализм</div></div>
+        <div class="roster-card"><div class="rc-name">К. Леви-Стросс</div><div class="rc-years">1908–2009</div><div class="rc-concept" style="--rc:var(--gold);">Структурализм</div></div>
+        <div class="roster-card"><div class="rc-name">М. Элиаде</div><div class="rc-years">1907–1986</div><div class="rc-concept" style="--rc:var(--indigo);">Иерофания</div></div>
+        <div class="roster-card"><div class="rc-name">К. Гирц</div><div class="rc-years">1926–2006</div><div class="rc-concept" style="--rc:var(--rose);">Тығыз сипаттама</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 — TYLOR -->
+  <section class="slide dark accent-gold" aria-label="Слайд: Эдвард Тайлор">
     <div class="glow"></div>
     <div class="slide-inner thinker">
       <div>
@@ -325,13 +423,14 @@
       </div>
       <div>
         <p class="thinker-concept">Анимизм</p>
-        <p class="body-text" style="margin-top:1.1rem;max-width:42ch;">Дінді зерттеудің алғашқы ғылыми теориясын ұсынды: дін — рухтар мен жандардың бар екеніне деген сенімнен басталады. Ежелгі адамдар түс көру мен өлімді түсіндіру үшін «жан» ұғымын ойлап тапқан, кейін бұл түсінік рухтар мен құдайларға дейін кеңейген.</p>
+        <p class="body-text" style="margin-top:1rem;max-width:42ch;">Дінді зерттеудің алғашқы ғылыми теориясын ұсынды: дін — рухтар мен жандардың бар екеніне деген сенімнен басталады. Ежелгі адамдар түс көру мен өлімді түсіндіру үшін «жан» ұғымын ойлап тапқан, кейін бұл түсінік рухтар мен құдайларға дейін кеңейген деп тұжырымдады.</p>
+        <p class="critique"><b>Сын:</b> дінді дамудың «қарапайым» сатысы деп қарап, эволюционистік және еуроцентристік көзқарасы үшін сынға алынды.</p>
       </div>
     </div>
   </section>
 
-  <!-- 6 — FRAZER -->
-  <section class="slide dark accent-indigo" data-index="5" aria-label="Слайд 6: Джеймс Фрэзер">
+  <!-- 9 — FRAZER -->
+  <section class="slide dark accent-indigo" aria-label="Слайд: Джеймс Фрэзер">
     <div class="glow"></div>
     <div class="slide-inner thinker">
       <div>
@@ -341,13 +440,14 @@
       </div>
       <div>
         <p class="thinker-concept">Магия → Дін → Ғылым</p>
-        <p class="body-text" style="margin-top:1.1rem;max-width:42ch;">Адамзат ойлауының үш сатысын сипаттады: алдымен әлемді магиямен басқаруға тырысады, сәтсіздікке ұшырағанда құдайлардың рақымына жүгінеді, соңында табиғат заңдарын ғылым арқылы түсінеді. Әлемнің әр түкпіріндегі мифтерді салыстырды.</p>
+        <p class="body-text" style="margin-top:1rem;max-width:42ch;">Адамзат ойлауының үш сатысын сипаттады: алдымен әлемді магиямен басқаруға тырысады, сәтсіздікке ұшырағанда құдайлардың рақымына жүгінеді, соңында табиғат заңдарын ғылым арқылы түсінеді. Әлемнің әр түкпіріндегі мифтер мен ғұрыптарды салыстырмалы түрде жинақтады.</p>
+        <p class="critique"><b>Сын:</b> далалық зерттеу жүргізбей, миссионерлер мен саяхатшылардың жазбаларына сүйенгені үшін сынға ұшырады.</p>
       </div>
     </div>
   </section>
 
-  <!-- 7 — DURKHEIM -->
-  <section class="slide dark accent-rose" data-index="6" aria-label="Слайд 7: Эмиль Дюркгейм">
+  <!-- 10 — DURKHEIM -->
+  <section class="slide dark accent-rose" aria-label="Слайд: Эмиль Дюркгейм">
     <div class="glow"></div>
     <div class="slide-inner thinker">
       <div>
@@ -357,13 +457,14 @@
       </div>
       <div>
         <p class="thinker-concept">Қасиетті және дүниелік</p>
-        <p class="body-text" style="margin-top:1.1rem;max-width:42ch;">Дінді қоғамнан тыс құбылыс емес, қоғамның өзін-өзі тануының тәсілі деп түсіндірді. Тотемдік ғұрыптарды зерттей отырып, «қасиетті» мен «дүниелікті» ажырату — әрбір діннің негізгі белгісі деген қорытынды жасады.</p>
+        <p class="body-text" style="margin-top:1rem;max-width:42ch;">Дінді қоғамнан тыс құбылыс емес, қоғамның өзін-өзі тануының тәсілі деп түсіндірді. Тотемдік ғұрыптарды зерттей отырып, «қасиетті» мен «дүниелікті» ажырату — әрбір діннің негізгі белгісі деген қорытынды жасады. Ғибадат ету арқылы қауым өз бірлігін сезінеді.</p>
+        <p class="critique"><b>Сын:</b> тек аустралиялық аборигендердің материалына негізделіп, әмбебап қорытынды жасағаны үшін сынға алынды.</p>
       </div>
     </div>
   </section>
 
-  <!-- 8 — MALINOWSKI -->
-  <section class="slide dark accent-sage" data-index="7" aria-label="Слайд 8: Бронислав Малиновский">
+  <!-- 11 — MALINOWSKI -->
+  <section class="slide dark accent-sage" aria-label="Слайд: Бронислав Малиновский">
     <div class="glow"></div>
     <div class="slide-inner thinker">
       <div>
@@ -373,29 +474,31 @@
       </div>
       <div>
         <p class="thinker-concept">Функционализм</p>
-        <p class="body-text" style="margin-top:1.1rem;max-width:42ch;">Антропологияға «қатысушы бақылау» әдісін алып келді — зерттеуші қауыммен бірге өмір сүріп, тілін меңгеруі керек. Дін мен магия адамдардың белгісіздік пен қауіп-қатерге психологиялық жауап беруіне көмектесетін нақты қоғамдық қызмет атқарады.</p>
+        <p class="body-text" style="margin-top:1rem;max-width:42ch;">Антропологияға «қатысушы бақылау» әдісін алып келді — зерттеуші қауыммен бірге өмір сүріп, тілін меңгеруі керек. Дін мен магия адамдардың белгісіздік пен қауіп-қатерге психологиялық жауап беруіне көмектесетін нақты қоғамдық қызмет атқарады деп есептеді.</p>
+        <p class="critique"><b>Сын:</b> кейін жарияланған жеке күнделіктері зерттелетін қауымға деген жеке пікірлерінің әдісіне әсер еткенін көрсетті.</p>
       </div>
     </div>
   </section>
 
-  <!-- 9 — LEVI-STRAUSS -->
-  <section class="slide dark accent-gold" data-index="8" aria-label="Слайд 9: Клод Леви-Стросс">
+  <!-- 12 — LEVI-STRAUSS -->
+  <section class="slide dark accent-gold" aria-label="Слайд: Клод Леви-Стросс">
     <div class="glow"></div>
     <div class="slide-inner thinker">
       <div>
         <p class="kicker">1908–2009 · Француз антропологы</p>
         <h2 class="thinker-name">Клод Леви-Стросс</h2>
-        <p class="tag">«Мифологиялар» сериясы</p>
+        <p class="tag">«Мифологиялар» сериясы, 1964–1971</p>
       </div>
       <div>
         <p class="thinker-concept">Структурализм</p>
-        <p class="body-text" style="margin-top:1.1rem;max-width:42ch;">Мифтерді сыртқы мазмұны бойынша емес, астарындағы жасырын логикалық құрылымдар арқылы талдады. Әртүрлі мәдениеттердегі мифтер өмір/өлім, табиғат/мәдениет сияқты қарама-қарсы ұғымдарды үйлестіруге тырысатын адам ойының ортақ тілін көрсетеді.</p>
+        <p class="body-text" style="margin-top:1rem;max-width:42ch;">Мифтерді сыртқы мазмұны бойынша емес, астарындағы жасырын логикалық құрылымдар арқылы талдады. Әртүрлі мәдениеттердегі мифтер өмір/өлім, табиғат/мәдениет сияқты қарама-қарсы ұғымдарды үйлестіруге тырысатын адам ойының ортақ тілін көрсетеді деп есептеді.</p>
+        <p class="critique"><b>Сын:</b> тарихи және әлеуметтік контекстті ескермей, тым абстрактілі әрі тексерілмейтін теория құрғаны үшін сынға алынды.</p>
       </div>
     </div>
   </section>
 
-  <!-- 10 — ELIADE -->
-  <section class="slide dark accent-indigo" data-index="9" aria-label="Слайд 10: Мирча Элиаде">
+  <!-- 13 — ELIADE -->
+  <section class="slide dark accent-indigo" aria-label="Слайд: Мирча Элиаде">
     <div class="glow"></div>
     <div class="slide-inner thinker">
       <div>
@@ -405,13 +508,14 @@
       </div>
       <div>
         <p class="thinker-concept">Иерофания</p>
-        <p class="body-text" style="margin-top:1.1rem;max-width:42ch;">Қасиетті нәрсенің әдеттегі дүниеде көрінуін «иерофания» деп атады. Сенуші адам үшін кеңістік пен уақыт біркелкі емес — киелі орындар мен мейрамдар арқылы адам мифтік «бастапқы уақытқа» қайта оралады деп тұжырымдады.</p>
+        <p class="body-text" style="margin-top:1rem;max-width:42ch;">Қасиетті нәрсенің әдеттегі дүниеде көрінуін «иерофания» деп атады. Сенуші адам үшін кеңістік пен уақыт біркелкі емес — киелі орындар мен мейрамдар арқылы адам мифтік «бастапқы уақытқа» қайта оралады деп тұжырымдады.</p>
+        <p class="critique"><b>Сын:</b> дінді нақты тарихи-әлеуметтік жағдайдан тыс, «мәңгілік» әрі бірыңғай құбылыс ретінде қарастырғаны сынға алынды.</p>
       </div>
     </div>
   </section>
 
-  <!-- 11 — GEERTZ -->
-  <section class="slide dark accent-rose" data-index="10" aria-label="Слайд 11: Клиффорд Гирц">
+  <!-- 14 — GEERTZ -->
+  <section class="slide dark accent-rose" aria-label="Слайд: Клиффорд Гирц">
     <div class="glow"></div>
     <div class="slide-inner thinker">
       <div>
@@ -421,30 +525,95 @@
       </div>
       <div>
         <p class="thinker-concept">Тығыз сипаттама</p>
-        <p class="body-text" style="margin-top:1.1rem;max-width:42ch;">Дінді «символдар жүйесі» ретінде анықтады — ол адамдарда терең әрі ұзаққа созылатын көңіл-күй мен уәж қалыптастырады. Ғұрыптың сыртқы көрінісін ғана емес, оның мәдени мағынасын терең түсіндіру («тығыз сипаттама») қажет екенін көрсетті.</p>
+        <p class="body-text" style="margin-top:1rem;max-width:42ch;">Дінді «символдар жүйесі» ретінде анықтады — ол адамдарда терең әрі ұзаққа созылатын көңіл-күй мен уәж қалыптастырады. Бали аралындағы қораз ұрысын зерттеуінде ғұрыптың сыртқы көрінісін ғана емес, оның мәдени мағынасын терең түсіндіру («тығыз сипаттама») қажет екенін көрсетті.</p>
+        <p class="critique"><b>Сын:</b> интерпретация тым субъективті болып, дәлелдеу мен тексеру мүмкіндігінің жоқтығы үшін сынға алынды.</p>
       </div>
     </div>
   </section>
 
-  <!-- 12 — METHODS -->
-  <section class="slide light" data-index="11" aria-label="Слайд 12: Зерттеу әдістері">
+  <!-- 15 — GLOSSARY -->
+  <section class="slide light" aria-label="Слайд: Негізгі ұғымдар">
     <div class="slide-inner">
-      <p class="kicker">04 · Зерттеу әдістері</p>
-      <h2 class="headline" style="max-width:none;">Дала жұмысынан теорияға дейін</h2>
+      <p class="kicker">06 · Негізгі ұғымдар</p>
+      <h2 class="headline" style="max-width:none;">Пәннің терминдер сөздігі</h2>
+      <div class="tiles cols-4" style="margin-top:1.8rem;">
+        <div class="tile small"><h3>Қасиетті</h3><p>Дүниелік әлемнен бөлек, ерекше құрметке бөленетін нәрсе (Дюркгейм)</p></div>
+        <div class="tile small"><h3>Дүниелік</h3><p>Күнделікті, қарапайым, қасиеттіден ерекшеленетін өмір саласы</p></div>
+        <div class="tile small"><h3>Тотем</h3><p>Ру немесе топтың символдық ата-тегі саналатын жануар не зат</p></div>
+        <div class="tile small"><h3>Табу</h3><p>Белгілі бір нәрсеге тиюге немесе істеуге қатаң тыйым салу</p></div>
+        <div class="tile small"><h3>Ғұрып</h3><p>Символдық мағынасы бар, белгілі тәртіппен қайталанатын іс-әрекет</p></div>
+        <div class="tile small"><h3>Миф</h3><p>Әлемнің немесе адамның шығу тегін түсіндіретін қасиетті баяндау</p></div>
+        <div class="tile small"><h3>Лиминалдылық</h3><p>Өту ғұрпындағы аралық кезең — мәртебесі әлі анықталмаған күй</p></div>
+        <div class="tile small"><h3>Коммунитас</h3><p>Лиминалдық кезеңде туындайтын иерархиясыз бірлік сезімі (Тэрнер)</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 16 — RITES OF PASSAGE -->
+  <section class="slide dark accent-indigo" aria-label="Слайд: Өту ғұрыптары мен лиминалдылық">
+    <div class="glow"></div>
+    <div class="slide-inner">
+      <p class="kicker">07 · Өту ғұрыптары</p>
+      <h2 class="headline" style="max-width:none;">Өту ғұрыптары мен лиминалдылық</h2>
+      <p class="body-text" style="margin-top:.8rem;max-width:70ch;">Арнольд ван Геннеп (1873–1957) 1909 жылы «Les rites de passage» еңбегінде туу, ересек болу, үйлену және өлім сияқты өмірлік кезеңдерді белгілейтін ғұрыптардың үш сатылы құрылымын ашты:</p>
       <div class="tiles cols-3">
+        <div class="tile"><h3>1 · Бөліну</h3><p>Адам ескі мәртебесінен, әдеттегі әлеуметтік ортасынан қол үзеді</p></div>
+        <div class="tile"><h3>2 · Аралық кезең</h3><p>Екі мәртебенің ортасында, «лиминалдық» анықталмаған күйде болу</p></div>
+        <div class="tile"><h3>3 · Қосылу</h3><p>Жаңа мәртебемен қоғамға қайта, енді өзгерген түрде қосылу</p></div>
+      </div>
+      <p class="body-text" style="margin-top:1.3rem;max-width:70ch;">Виктор Тэрнер (1920–1983) бұл идеяны дамытып, «Ритуал процесі» (1969) еңбегінде лиминалдық кезеңде туындайтын <b style="color:var(--accent);">коммунитас</b> — иерархия жойылған, тең құқылы уақытша бірлік сезімін сипаттады.</p>
+    </div>
+  </section>
+
+  <!-- 17 — METHODS & ETHICS -->
+  <section class="slide light" aria-label="Слайд: Зерттеу әдістері мен этика">
+    <div class="slide-inner">
+      <p class="kicker">08 · Зерттеу әдістері мен этика</p>
+      <h2 class="headline" style="max-width:none;">Дала жұмысынан теорияға дейін</h2>
+      <div class="tiles cols-2">
         <div class="tile"><h3>Этнография</h3><p>Қауымда ұзақ уақыт тұрып, күнделікті өмірді егжей-тегжейлі жазып отыру</p></div>
         <div class="tile"><h3>Қатысушы бақылау</h3><p>Зерттеуші оқиғаға сырттан емес, қатысушы ретінде қарайды</p></div>
         <div class="tile"><h3>Салыстырмалы талдау</h3><p>Әртүрлі мәдениеттердегі ғұрыптар мен мифтерді салыстырып, ортақ заңдылықты табу</p></div>
+        <div class="tile"><h3>Эмик / этик көзқарас</h3><p>Қауым мүшесінің ішкі көзқарасы («эмик») мен зерттеушінің сырттай талдауы («этик») арасын ажырату</p></div>
+      </div>
+      <p class="body-text" style="margin-top:1.3rem;max-width:70ch;">Далалық зерттеу этикасы қауымның ерікті келісімін алуды (informed consent), зерттеушінің өз позициясын ашық мойындауын (reflexivity) және зерттелетін адамдарға зиян тигізбеу қағидасын міндеттейді.</p>
+    </div>
+  </section>
+
+  <!-- 18 — CRITIQUE -->
+  <section class="slide dark accent-rose" aria-label="Слайд: Сыни көзқарас">
+    <div class="glow"></div>
+    <div class="slide-inner">
+      <p class="kicker">09 · Сыни көзқарас</p>
+      <h2 class="headline" style="max-width:none;">Пәнге деген сын</h2>
+      <div class="tiles cols-2">
+        <div class="tile"><h3>Еуроцентризм</h3><p>Алғашқы теориялар батыстық дінді «даму шыңы», басқа мәдениеттерді «қарапайым» деп қарастырды</p></div>
+        <div class="tile"><h3>Отарлық мұра</h3><p>Антропологиялық білім көбіне отарлаушы державалардың мүддесіне қызмет етіп, зерттелетін қауымның дауысын естімеді</p></div>
+        <div class="tile"><h3>Объективтілік мәселесі</h3><p>Зерттеушінің өз мәдени көзқарасы бақылау мен интерпретацияға қаншалықты әсер ететіні даулы мәселе болып қалады</p></div>
+        <div class="tile"><h3>Рефлексивті бетбұрыс</h3><p>1980-жылдардан бастап антропологтар өз позициясын ашық мойындап, зерттелетін қауыммен диалогтық қатынас құруға көшті</p></div>
       </div>
     </div>
   </section>
 
-  <!-- 13 — SIGNIFICANCE -->
-  <section class="slide light" data-index="12" aria-label="Слайд 13: Маңыздылығы">
+  <!-- 19 — CONTEMPORARY DIRECTIONS -->
+  <section class="slide light" aria-label="Слайд: Қазіргі бағыттар">
     <div class="slide-inner">
-      <p class="kicker">05 · Маңыздылығы</p>
+      <p class="kicker">10 · Қазіргі бағыттар</p>
+      <h2 class="headline" style="max-width:none;">Пән бүгін қалай дамып жатыр?</h2>
+      <div class="tiles cols-3">
+        <div class="tile"><h3>Когнитивті дінтану</h3><p>Дінге деген сенімнің танымдық негіздерін зерттейді (П. Бойер, Х. Уайтхаус)</p></div>
+        <div class="tile"><h3>Дін және жаһандану</h3><p>Жаһандық көші-қон мен медиа дінді ұлттық шекарадан асырып, гибридті формалар тудыруда</p></div>
+        <div class="tile"><h3>Цифрлық дін</h3><p>Онлайн платформалардағы діни білім, виртуалды ғибадат және желілік қауымдастықтар</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 20 — SIGNIFICANCE -->
+  <section class="slide light" aria-label="Слайд: Маңыздылығы">
+    <div class="slide-inner">
+      <p class="kicker">11 · Маңыздылығы</p>
       <h2 class="headline" style="max-width:none;">Неге бұл маңызды?</h2>
-      <div style="margin-top:2rem;">
+      <div style="margin-top:1.6rem;">
         <div class="sig-row"><div class="sig-word">Түсіністік</div><div class="sig-text">Өзге мәдениеттің дүниетанымын сырттан емес, ішінен түсінуге үйретеді.</div></div>
         <div class="sig-row"><div class="sig-word">Толеранттылық</div><div class="sig-text">Дінді «дұрыс» немесе «бұрыс» деп бөлместен, әрқайсысының өз логикасын көруге мүмкіндік береді.</div></div>
         <div class="sig-row"><div class="sig-word">Өзін-өзі тану</div><div class="sig-text">Басқа қоғамдарды зерттеу арқылы өз мәдениетіміздің де құрылымын айқынырақ көреміз.</div></div>
@@ -452,8 +621,41 @@
     </div>
   </section>
 
-  <!-- 14 — CLOSING -->
-  <section class="slide dark cover accent-gold" data-index="13" aria-label="Слайд 14: Қорытынды">
+  <!-- 21 — BIBLIOGRAPHY -->
+  <section class="slide light" aria-label="Слайд: Ұсынылатын әдебиеттер">
+    <div class="slide-inner">
+      <p class="kicker">12 · Ұсынылатын әдебиеттер</p>
+      <h2 class="headline" style="max-width:none;">Негізгі дереккөздер</h2>
+      <div class="biblio">
+        <div class="biblio-item"><div class="biblio-year">1871</div><div class="biblio-text"><b>E. B. Tylor</b> — <em>Primitive Culture</em></div></div>
+        <div class="biblio-item"><div class="biblio-year">1890</div><div class="biblio-text"><b>J. G. Frazer</b> — <em>The Golden Bough</em></div></div>
+        <div class="biblio-item"><div class="biblio-year">1909</div><div class="biblio-text"><b>A. van Gennep</b> — <em>The Rites of Passage</em></div></div>
+        <div class="biblio-item"><div class="biblio-year">1912</div><div class="biblio-text"><b>É. Durkheim</b> — <em>The Elementary Forms of Religious Life</em></div></div>
+        <div class="biblio-item"><div class="biblio-year">1948</div><div class="biblio-text"><b>B. Malinowski</b> — <em>Magic, Science and Religion</em></div></div>
+        <div class="biblio-item"><div class="biblio-year">1957</div><div class="biblio-text"><b>M. Eliade</b> — <em>The Sacred and the Profane</em></div></div>
+        <div class="biblio-item"><div class="biblio-year">1969</div><div class="biblio-text"><b>V. Turner</b> — <em>The Ritual Process</em></div></div>
+        <div class="biblio-item"><div class="biblio-year">1973</div><div class="biblio-text"><b>C. Geertz</b> — <em>The Interpretation of Cultures</em></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 22 — SEMINAR QUESTIONS -->
+  <section class="slide light" aria-label="Слайд: Семинарға сұрақтар">
+    <div class="slide-inner">
+      <p class="kicker">13 · Талқылауға арналған сұрақтар</p>
+      <h2 class="headline" style="max-width:none;">Семинарға дайындық</h2>
+      <div style="margin-top:1.2rem;">
+        <div class="sig-row"><div class="sig-word">01</div><div class="sig-text">Дюркгеймнің «қасиетті мен дүниелікті» ажыратуы қазіргі қоғамда (мысалы, спорт немесе ұлттық рәміздерде) қалай көрінеді?</div></div>
+        <div class="sig-row"><div class="sig-word">02</div><div class="sig-text">Малиновскийдің «қатысушы бақылау» әдісінің артықшылықтары мен қауіптерін талдаңыз.</div></div>
+        <div class="sig-row"><div class="sig-word">03</div><div class="sig-text">Гирцтің «тығыз сипаттама» тәсілін қолданып, өзіңізге таныс бір ғұрыпты сипаттап көріңіз.</div></div>
+        <div class="sig-row"><div class="sig-word">04</div><div class="sig-text">Дін антропологиясына қатысты еуроцентризм сынын қалай бағалайсыз — ол әлі де өзекті ме?</div></div>
+        <div class="sig-row"><div class="sig-word">05</div><div class="sig-text">Цифрлық технологиялар діни тәжірибені қалай өзгертуде деп ойлайсыз?</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 23 — CLOSING -->
+  <section class="slide dark cover accent-gold" aria-label="Слайд: Қорытынды">
     <div class="glow"></div><div class="rings"></div>
     <div class="slide-inner">
       <p class="kicker">Дәріс аяқталды</p>
@@ -467,35 +669,33 @@
     </div>
   </section>
 
-  <div class="dots chip" id="dots">
-    <button class="dot active" data-i="0" aria-label="1-слайдқа өту"></button>
-    <button class="dot" data-i="1" aria-label="2-слайдқа өту"></button>
-    <button class="dot" data-i="2" aria-label="3-слайдқа өту"></button>
-    <button class="dot" data-i="3" aria-label="4-слайдқа өту"></button>
-    <button class="dot" data-i="4" aria-label="5-слайдқа өту"></button>
-    <button class="dot" data-i="5" aria-label="6-слайдқа өту"></button>
-    <button class="dot" data-i="6" aria-label="7-слайдқа өту"></button>
-    <button class="dot" data-i="7" aria-label="8-слайдқа өту"></button>
-    <button class="dot" data-i="8" aria-label="9-слайдқа өту"></button>
-    <button class="dot" data-i="9" aria-label="10-слайдқа өту"></button>
-    <button class="dot" data-i="10" aria-label="11-слайдқа өту"></button>
-    <button class="dot" data-i="11" aria-label="12-слайдқа өту"></button>
-    <button class="dot" data-i="12" aria-label="13-слайдқа өту"></button>
-    <button class="dot" data-i="13" aria-label="14-слайдқа өту"></button>
-  </div>
+  <div class="dots chip" id="dots"></div>
 </div>
 
 <script>
 (function(){
   var deck = document.getElementById('deck');
   var slides = Array.prototype.slice.call(deck.querySelectorAll('.slide'));
-  var dots = Array.prototype.slice.call(deck.querySelectorAll('.dot'));
+  var dotsContainer = document.getElementById('dots');
   var prevBtn = document.getElementById('prevBtn');
   var nextBtn = document.getElementById('nextBtn');
   var counter = document.getElementById('slideCounter');
   var fill = document.getElementById('progressFill');
+  var countLabel = document.getElementById('slideCountLabel');
   var total = slides.length;
   var current = 0;
+  var dots = [];
+
+  slides.forEach(function(s, i){
+    s.setAttribute('data-index', i);
+    var d = document.createElement('button');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.setAttribute('aria-label', (i + 1) + '-слайдқа өту');
+    d.addEventListener('click', function(){ goTo(i); });
+    dotsContainer.appendChild(d);
+    dots.push(d);
+  });
+  if (countLabel) { countLabel.textContent = total + ' слайд'; }
 
   function pad(n){ return n < 10 ? '0' + n : '' + n; }
 
@@ -515,7 +715,6 @@
 
   prevBtn.addEventListener('click', function(){ goTo(current - 1); });
   nextBtn.addEventListener('click', function(){ goTo(current + 1); });
-  dots.forEach(function(d, i){ d.addEventListener('click', function(){ goTo(i); }); });
 
   window.addEventListener('keydown', function(e){
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' '){
