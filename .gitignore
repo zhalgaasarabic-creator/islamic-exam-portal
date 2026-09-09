@@ -1,0 +1,10 @@
+.netlify/
+.vercel/
+public/
+.env
+
+# TULGA runtime data (JSON-file fallback storage, used only when
+# DATABASE_URL / Netlify DB isn't configured) — never committed.
+tulga_participants.json
+tulga_submissions.json
+tulga_scorecards.json
