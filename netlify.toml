@@ -1,0 +1,12 @@
+[build]
+  command = "mkdir -p public/tulga && cp index.html index.css app.js public/ && cp tulga/index.html tulga/style.css tulga/app.js tulga/content.js public/tulga/"
+  publish = "public"
+
+[functions]
+  directory = "netlify/functions"
+  included_files = ["questions.js", "questions_db.json", "db.json"]
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200

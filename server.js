@@ -8,11 +8,24 @@ const { Pool } = require('pg');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Resolve a Postgres connection string: an explicit DATABASE_URL (Vercel,
+// Render, local dev, etc.) takes priority; on Netlify, @netlify/database
+// auto-provisions a Postgres instance and hands back its connection string.
+let connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  try {
+    const { getConnectionString } = require('@netlify/database');
+    connectionString = getConnectionString();
+  } catch (err) {
+    // Not running on Netlify / package not installed — fall through to JSON-file storage.
+  }
+}
+
 // PostgreSQL database configuration
 let pool = null;
-if (process.env.DATABASE_URL) {
+if (connectionString) {
   pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString,
     ssl: { rejectUnauthorized: false }
   });
   
@@ -79,6 +92,21 @@ const TULGA_SCORECARDS_FILE = path.join(__dirname, 'tulga_scorecards.json');
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Server-side files (source code, raw student/participant data) must never
+// be served as static assets, even though they live next to the frontend files.
+const STATIC_DENYLIST = new Set([
+  'server.js', 'package.json', 'package-lock.json', 'vercel.json', 'netlify.toml',
+  'db.json', 'questions_db.json',
+  'tulga_participants.json', 'tulga_submissions.json', 'tulga_scorecards.json'
+]);
+app.use((req, res, next) => {
+  const base = path.basename(req.path);
+  if (STATIC_DENYLIST.has(base) || req.path.startsWith('/node_modules/') || req.path.startsWith('/netlify/') || req.path.startsWith('/.')) {
+    return res.status(404).end();
+  }
+  next();
+});
 app.use(express.static(__dirname));
 
 // On serverless platforms (e.g. Vercel) the deployed filesystem is read-only,
