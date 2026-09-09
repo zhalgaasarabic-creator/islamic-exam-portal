@@ -233,7 +233,7 @@ window.TULGA_CONTENT = {
       { key: "q1", label: "1. Бұл жерде факт қандай?", type: "textarea" },
       { key: "q2", label: "2. Интерпретация қандай?", type: "textarea" },
       { key: "q3", label: "3. Қандай ақпарат жетіспейді?", type: "textarea" },
-      { key: "q4", label: "4. Қандай себептер болуы мүмкін? (кемінде 5)", type: "listmin", min: 5 },
+      { key: "q4", label: "4. Қандай себептер болуы мүмкін?", type: "listmin", min: 5 },
       { key: "q5", label: "5. «Университет кінәлі» деген гипотезаны қалай тексерер едіңіз?", type: "textarea" },
       { key: "q6", label: "6. Өзіңіздің жауапкершілік аймағыңыз қандай?", type: "textarea" },
       { key: "q7", label: "7. Үш шешім ұсыныңыз.", type: "listExact", count: 3 },
