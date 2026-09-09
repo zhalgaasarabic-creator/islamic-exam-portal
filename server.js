@@ -43,6 +43,11 @@ if (process.env.DATABASE_URL) {
 const DB_FILE = path.join(__dirname, 'db.json');
 const QUESTIONS_FILE = path.join(__dirname, 'questions_db.json');
 
+// TULGA project data files
+const TULGA_PARTICIPANTS_FILE = path.join(__dirname, 'tulga_participants.json');
+const TULGA_SUBMISSIONS_FILE = path.join(__dirname, 'tulga_submissions.json');
+const TULGA_SCORECARDS_FILE = path.join(__dirname, 'tulga_scorecards.json');
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -52,6 +57,13 @@ app.use(express.static(__dirname));
 if (!fs.existsSync(DB_FILE)) {
   fs.writeFileSync(DB_FILE, JSON.stringify([], null, 2), 'utf8');
 }
+
+// Ensure TULGA data files exist
+[TULGA_PARTICIPANTS_FILE, TULGA_SUBMISSIONS_FILE, TULGA_SCORECARDS_FILE].forEach((file) => {
+  if (!fs.existsSync(file)) {
+    fs.writeFileSync(file, JSON.stringify([], null, 2), 'utf8');
+  }
+});
 
 // Ensure questions_db.json exists, otherwise initialize it from questions.js
 if (!fs.existsSync(QUESTIONS_FILE)) {
@@ -107,6 +119,26 @@ const writeQuestions = (data) => {
     return true;
   } catch (error) {
     console.error("Error writing questions:", error);
+    return false;
+  }
+};
+
+// Generic JSON file store (used by the TULGA project)
+const readJSON = (file) => {
+  try {
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch (error) {
+    console.error("Error reading " + file + ":", error);
+    return [];
+  }
+};
+
+const writeJSON = (file, data) => {
+  try {
+    fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
+    return true;
+  } catch (error) {
+    console.error("Error writing " + file + ":", error);
     return false;
   }
 };
@@ -264,6 +296,121 @@ app.put('/api/questions/:id', (req, res) => {
   } else {
     res.status(500).json({ error: "Деректерді сақтау кезінде сервер қатесі орын алды" });
   }
+});
+
+// --- TULGA PROJECT ENDPOINTS ---
+
+// 7. REGISTER / RESUME A TULGA PARTICIPANT
+app.post('/api/tulga/participants', (req, res) => {
+  const { name, group } = req.body;
+  if (!name || !group) {
+    return res.status(400).json({ error: "Аты-жөні мен тобын толтырыңыз" });
+  }
+
+  const participants = readJSON(TULGA_PARTICIPANTS_FILE);
+  const normalizedName = name.trim().toLowerCase();
+  const normalizedGroup = group.trim().toLowerCase();
+
+  let participant = participants.find(
+    (p) => p.name.trim().toLowerCase() === normalizedName && p.group.trim().toLowerCase() === normalizedGroup
+  );
+
+  if (!participant) {
+    participant = {
+      id: Date.now().toString(),
+      name: name.trim(),
+      group: group.trim(),
+      createdAt: new Date().toISOString()
+    };
+    participants.push(participant);
+    if (!writeJSON(TULGA_PARTICIPANTS_FILE, participants)) {
+      return res.status(500).json({ error: "Тіркеу кезінде сервер қатесі орын алды" });
+    }
+  }
+
+  res.status(201).json(participant);
+});
+
+// 8. LIST ALL TULGA PARTICIPANTS (mentor dashboard)
+app.get('/api/tulga/participants', (req, res) => {
+  res.json(readJSON(TULGA_PARTICIPANTS_FILE));
+});
+
+// 9. SAVE / UPDATE A DAY'S SUBMISSION (upsert by participantId + day)
+app.post('/api/tulga/submissions', (req, res) => {
+  const { participantId, day, data } = req.body;
+  if (!participantId || !day) {
+    return res.status(400).json({ error: "participantId және day өрістері қажет" });
+  }
+
+  const submissions = readJSON(TULGA_SUBMISSIONS_FILE);
+  const index = submissions.findIndex((s) => s.participantId === participantId && s.day === day);
+  const record = {
+    participantId,
+    day,
+    data: data || {},
+    updatedAt: new Date().toISOString()
+  };
+
+  if (index === -1) {
+    submissions.push(record);
+  } else {
+    submissions[index] = record;
+  }
+
+  if (writeJSON(TULGA_SUBMISSIONS_FILE, submissions)) {
+    res.status(200).json(record);
+  } else {
+    res.status(500).json({ error: "Сақтау кезінде сервер қатесі орын алды" });
+  }
+});
+
+// 10. GET ALL SUBMISSIONS FOR ONE PARTICIPANT, KEYED BY DAY
+app.get('/api/tulga/submissions/:participantId', (req, res) => {
+  const { participantId } = req.params;
+  const submissions = readJSON(TULGA_SUBMISSIONS_FILE).filter((s) => s.participantId === participantId);
+  const byDay = {};
+  submissions.forEach((s) => { byDay[s.day] = s.data; });
+  res.json(byDay);
+});
+
+// 11. SAVE / UPDATE A MENTOR SCORECARD (upsert by participantId + module)
+app.post('/api/tulga/scorecard', (req, res) => {
+  const { participantId, module, scores, total, note } = req.body;
+  if (!participantId || !module) {
+    return res.status(400).json({ error: "participantId және module өрістері қажет" });
+  }
+
+  const scorecards = readJSON(TULGA_SCORECARDS_FILE);
+  const index = scorecards.findIndex((s) => s.participantId === participantId && s.module === module);
+  const record = {
+    participantId,
+    module,
+    scores: scores || {},
+    total: total || 0,
+    note: note || "",
+    updatedAt: new Date().toISOString()
+  };
+
+  if (index === -1) {
+    scorecards.push(record);
+  } else {
+    scorecards[index] = record;
+  }
+
+  if (writeJSON(TULGA_SCORECARDS_FILE, scorecards)) {
+    res.status(200).json(record);
+  } else {
+    res.status(500).json({ error: "Сақтау кезінде сервер қатесі орын алды" });
+  }
+});
+
+// 12. GET A PARTICIPANT'S SCORECARD
+app.get('/api/tulga/scorecard/:participantId', (req, res) => {
+  const { participantId } = req.params;
+  const scorecards = readJSON(TULGA_SCORECARDS_FILE);
+  const record = scorecards.find((s) => s.participantId === participantId);
+  res.json(record || {});
 });
 
 // Serve frontend fallback to index.html

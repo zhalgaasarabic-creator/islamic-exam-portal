@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ТҰЛҒА жобасы | Интеллектуалдық даму — 1-апта</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- REGISTRATION SCREEN -->
+<div class="screen" id="reg-screen">
+  <div class="card reg-card">
+    <div class="reg-header">
+      <div class="reg-logo"><i class="fa-solid fa-brain"></i></div>
+      <h1>ТҰЛҒА жобасы</h1>
+      <p>1-апта · Интеллектуалдық даму модулі</p>
+    </div>
+    <div class="form-group">
+      <label>Аты-жөніңіз</label>
+      <input type="text" id="reg-name" class="input" placeholder="Мысалы: Асхат Дәулетов">
+    </div>
+    <div class="form-group">
+      <label>Тобыңыз</label>
+      <input type="text" id="reg-group" class="input" placeholder="Мысалы: 2-курс ұлдар">
+    </div>
+    <button class="btn btn-primary btn-block" id="reg-start-btn"><i class="fa-solid fa-arrow-right"></i> Бастау</button>
+    <div class="reg-divider"><span>немесе</span></div>
+    <button class="btn btn-outline btn-block" id="mentor-login-btn"><i class="fa-solid fa-user-tie"></i> Жетекші кабинеті</button>
+  </div>
+</div>
+
+<!-- MENTOR PASSCODE MODAL -->
+<div class="modal-overlay hidden" id="mentor-modal">
+  <div class="card modal-card">
+    <h3><i class="fa-solid fa-lock"></i> Жетекші кіруі</h3>
+    <input type="password" id="mentor-passcode" class="input" placeholder="Құпия сөз">
+    <p class="error-text hidden" id="mentor-error">Қате құпия сөз</p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" id="mentor-cancel-btn">Жабу</button>
+      <button class="btn btn-primary" id="mentor-submit-btn">Кіру</button>
+    </div>
+  </div>
+</div>
+
+<!-- PARTICIPANT APP -->
+<div class="screen hidden" id="app-screen">
+  <header class="topbar">
+    <div class="brand"><i class="fa-solid fa-brain"></i> ТҰЛҒА · Интеллект</div>
+    <div class="whoami" id="whoami"></div>
+    <button class="btn btn-ghost" id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i></button>
+  </header>
+  <nav class="tabs" id="tabs"></nav>
+  <main class="content" id="content"></main>
+</div>
+
+<!-- MENTOR DASHBOARD -->
+<div class="screen hidden" id="mentor-screen">
+  <header class="topbar">
+    <div class="brand"><i class="fa-solid fa-user-tie"></i> ТҰЛҒА · Жетекші кабинеті</div>
+    <button class="btn btn-ghost" id="mentor-logout-btn"><i class="fa-solid fa-right-from-bracket"></i></button>
+  </header>
+  <div class="mentor-layout">
+    <aside class="mentor-list" id="mentor-participant-list"></aside>
+    <main class="mentor-detail" id="mentor-detail">
+      <div class="empty-hint"><i class="fa-solid fa-arrow-left"></i> Қатысушыны таңдаңыз</div>
+    </main>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script src="content.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
