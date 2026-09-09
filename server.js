@@ -16,7 +16,7 @@ if (process.env.DATABASE_URL) {
     ssl: { rejectUnauthorized: false }
   });
   
-  // Initialize PostgreSQL table
+  // Initialize PostgreSQL tables
   const initDB = async () => {
     try {
       await pool.query(`
@@ -31,9 +31,37 @@ if (process.env.DATABASE_URL) {
           date VARCHAR(100) NOT NULL
         )
       `);
-      console.log("PostgreSQL results table initialized successfully!");
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS tulga_participants (
+          id VARCHAR(50) PRIMARY KEY,
+          name VARCHAR(200) NOT NULL,
+          group_name VARCHAR(200) NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+      `);
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS tulga_submissions (
+          participant_id VARCHAR(50) NOT NULL,
+          day VARCHAR(20) NOT NULL,
+          data JSONB NOT NULL DEFAULT '{}'::jsonb,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          PRIMARY KEY (participant_id, day)
+        )
+      `);
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS tulga_scorecards (
+          participant_id VARCHAR(50) NOT NULL,
+          module VARCHAR(100) NOT NULL,
+          scores JSONB NOT NULL DEFAULT '{}'::jsonb,
+          total INTEGER NOT NULL DEFAULT 0,
+          note TEXT,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          PRIMARY KEY (participant_id, module)
+        )
+      `);
+      console.log("PostgreSQL tables initialized successfully!");
     } catch (err) {
-      console.error("Error initializing PostgreSQL table:", err);
+      console.error("Error initializing PostgreSQL tables:", err);
     }
   };
   initDB();
@@ -53,28 +81,35 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// Ensure db.json exists
-if (!fs.existsSync(DB_FILE)) {
-  fs.writeFileSync(DB_FILE, JSON.stringify([], null, 2), 'utf8');
-}
-
-// Ensure TULGA data files exist
-[TULGA_PARTICIPANTS_FILE, TULGA_SUBMISSIONS_FILE, TULGA_SCORECARDS_FILE].forEach((file) => {
-  if (!fs.existsSync(file)) {
-    fs.writeFileSync(file, JSON.stringify([], null, 2), 'utf8');
+// On serverless platforms (e.g. Vercel) the deployed filesystem is read-only,
+// so these bootstrap writes are best-effort: JSON-file storage only matters
+// for local/dev use without DATABASE_URL, and must never crash the app.
+try {
+  // Ensure db.json exists
+  if (!fs.existsSync(DB_FILE)) {
+    fs.writeFileSync(DB_FILE, JSON.stringify([], null, 2), 'utf8');
   }
-});
 
-// Ensure questions_db.json exists, otherwise initialize it from questions.js
-if (!fs.existsSync(QUESTIONS_FILE)) {
-  try {
-    const defaultQuestions = require('./questions.js');
-    fs.writeFileSync(QUESTIONS_FILE, JSON.stringify(defaultQuestions, null, 2), 'utf8');
-    console.log("Initialized questions_db.json from questions.js successfully!");
-  } catch (e) {
-    console.error("Failed to initialize questions from questions.js:", e);
-    fs.writeFileSync(QUESTIONS_FILE, JSON.stringify([], null, 2), 'utf8');
+  // Ensure TULGA data files exist
+  [TULGA_PARTICIPANTS_FILE, TULGA_SUBMISSIONS_FILE, TULGA_SCORECARDS_FILE].forEach((file) => {
+    if (!fs.existsSync(file)) {
+      fs.writeFileSync(file, JSON.stringify([], null, 2), 'utf8');
+    }
+  });
+
+  // Ensure questions_db.json exists, otherwise initialize it from questions.js
+  if (!fs.existsSync(QUESTIONS_FILE)) {
+    try {
+      const defaultQuestions = require('./questions.js');
+      fs.writeFileSync(QUESTIONS_FILE, JSON.stringify(defaultQuestions, null, 2), 'utf8');
+      console.log("Initialized questions_db.json from questions.js successfully!");
+    } catch (e) {
+      console.error("Failed to initialize questions from questions.js:", e);
+      fs.writeFileSync(QUESTIONS_FILE, JSON.stringify([], null, 2), 'utf8');
+    }
   }
+} catch (err) {
+  console.warn("Read-only filesystem detected — JSON-file storage is disabled (set DATABASE_URL for persistence):", err.message);
 }
 
 // --- UTILITIES FOR persistent STORE ---
@@ -299,17 +334,44 @@ app.put('/api/questions/:id', (req, res) => {
 });
 
 // --- TULGA PROJECT ENDPOINTS ---
+// Backed by PostgreSQL when DATABASE_URL is set; falls back to JSON files
+// for local/dev use (not durable on serverless platforms like Vercel).
 
 // 7. REGISTER / RESUME A TULGA PARTICIPANT
-app.post('/api/tulga/participants', (req, res) => {
+app.post('/api/tulga/participants', async (req, res) => {
   const { name, group } = req.body;
   if (!name || !group) {
     return res.status(400).json({ error: "Аты-жөні мен тобын толтырыңыз" });
   }
+  const trimmedName = name.trim();
+  const trimmedGroup = group.trim();
+
+  if (pool) {
+    try {
+      const existing = await pool.query(
+        'SELECT * FROM tulga_participants WHERE LOWER(name) = LOWER($1) AND LOWER(group_name) = LOWER($2) LIMIT 1',
+        [trimmedName, trimmedGroup]
+      );
+      if (existing.rows.length) {
+        const r = existing.rows[0];
+        return res.status(201).json({ id: r.id, name: r.name, group: r.group_name, createdAt: r.created_at });
+      }
+      const id = Date.now().toString();
+      const inserted = await pool.query(
+        'INSERT INTO tulga_participants (id, name, group_name) VALUES ($1, $2, $3) RETURNING *',
+        [id, trimmedName, trimmedGroup]
+      );
+      const r = inserted.rows[0];
+      return res.status(201).json({ id: r.id, name: r.name, group: r.group_name, createdAt: r.created_at });
+    } catch (err) {
+      console.error("Error registering TULGA participant in PostgreSQL:", err);
+      return res.status(500).json({ error: "Тіркеу кезінде дерекқор қатесі: " + err.message });
+    }
+  }
 
   const participants = readJSON(TULGA_PARTICIPANTS_FILE);
-  const normalizedName = name.trim().toLowerCase();
-  const normalizedGroup = group.trim().toLowerCase();
+  const normalizedName = trimmedName.toLowerCase();
+  const normalizedGroup = trimmedGroup.toLowerCase();
 
   let participant = participants.find(
     (p) => p.name.trim().toLowerCase() === normalizedName && p.group.trim().toLowerCase() === normalizedGroup
@@ -318,8 +380,8 @@ app.post('/api/tulga/participants', (req, res) => {
   if (!participant) {
     participant = {
       id: Date.now().toString(),
-      name: name.trim(),
-      group: group.trim(),
+      name: trimmedName,
+      group: trimmedGroup,
       createdAt: new Date().toISOString()
     };
     participants.push(participant);
@@ -332,15 +394,41 @@ app.post('/api/tulga/participants', (req, res) => {
 });
 
 // 8. LIST ALL TULGA PARTICIPANTS (mentor dashboard)
-app.get('/api/tulga/participants', (req, res) => {
+app.get('/api/tulga/participants', async (req, res) => {
+  if (pool) {
+    try {
+      const dbRes = await pool.query('SELECT * FROM tulga_participants ORDER BY created_at ASC');
+      return res.json(dbRes.rows.map((r) => ({ id: r.id, name: r.name, group: r.group_name, createdAt: r.created_at })));
+    } catch (err) {
+      console.error("Error listing TULGA participants from PostgreSQL:", err);
+      return res.status(500).json({ error: "Деректерді оқу қатесі: " + err.message });
+    }
+  }
   res.json(readJSON(TULGA_PARTICIPANTS_FILE));
 });
 
 // 9. SAVE / UPDATE A DAY'S SUBMISSION (upsert by participantId + day)
-app.post('/api/tulga/submissions', (req, res) => {
+app.post('/api/tulga/submissions', async (req, res) => {
   const { participantId, day, data } = req.body;
   if (!participantId || !day) {
     return res.status(400).json({ error: "participantId және day өрістері қажет" });
+  }
+
+  if (pool) {
+    try {
+      const upserted = await pool.query(
+        `INSERT INTO tulga_submissions (participant_id, day, data, updated_at)
+         VALUES ($1, $2, $3, now())
+         ON CONFLICT (participant_id, day) DO UPDATE SET data = $3, updated_at = now()
+         RETURNING *`,
+        [participantId, day, JSON.stringify(data || {})]
+      );
+      const r = upserted.rows[0];
+      return res.status(200).json({ participantId: r.participant_id, day: r.day, data: r.data, updatedAt: r.updated_at });
+    } catch (err) {
+      console.error("Error saving TULGA submission to PostgreSQL:", err);
+      return res.status(500).json({ error: "Сақтау кезінде дерекқор қатесі: " + err.message });
+    }
   }
 
   const submissions = readJSON(TULGA_SUBMISSIONS_FILE);
@@ -366,8 +454,21 @@ app.post('/api/tulga/submissions', (req, res) => {
 });
 
 // 10. GET ALL SUBMISSIONS FOR ONE PARTICIPANT, KEYED BY DAY
-app.get('/api/tulga/submissions/:participantId', (req, res) => {
+app.get('/api/tulga/submissions/:participantId', async (req, res) => {
   const { participantId } = req.params;
+
+  if (pool) {
+    try {
+      const dbRes = await pool.query('SELECT day, data FROM tulga_submissions WHERE participant_id = $1', [participantId]);
+      const byDay = {};
+      dbRes.rows.forEach((r) => { byDay[r.day] = r.data; });
+      return res.json(byDay);
+    } catch (err) {
+      console.error("Error reading TULGA submissions from PostgreSQL:", err);
+      return res.status(500).json({ error: "Деректерді оқу қатесі: " + err.message });
+    }
+  }
+
   const submissions = readJSON(TULGA_SUBMISSIONS_FILE).filter((s) => s.participantId === participantId);
   const byDay = {};
   submissions.forEach((s) => { byDay[s.day] = s.data; });
@@ -375,10 +476,27 @@ app.get('/api/tulga/submissions/:participantId', (req, res) => {
 });
 
 // 11. SAVE / UPDATE A MENTOR SCORECARD (upsert by participantId + module)
-app.post('/api/tulga/scorecard', (req, res) => {
+app.post('/api/tulga/scorecard', async (req, res) => {
   const { participantId, module, scores, total, note } = req.body;
   if (!participantId || !module) {
     return res.status(400).json({ error: "participantId және module өрістері қажет" });
+  }
+
+  if (pool) {
+    try {
+      const upserted = await pool.query(
+        `INSERT INTO tulga_scorecards (participant_id, module, scores, total, note, updated_at)
+         VALUES ($1, $2, $3, $4, $5, now())
+         ON CONFLICT (participant_id, module) DO UPDATE SET scores = $3, total = $4, note = $5, updated_at = now()
+         RETURNING *`,
+        [participantId, module, JSON.stringify(scores || {}), total || 0, note || ""]
+      );
+      const r = upserted.rows[0];
+      return res.status(200).json({ participantId: r.participant_id, module: r.module, scores: r.scores, total: r.total, note: r.note, updatedAt: r.updated_at });
+    } catch (err) {
+      console.error("Error saving TULGA scorecard to PostgreSQL:", err);
+      return res.status(500).json({ error: "Сақтау кезінде дерекқор қатесі: " + err.message });
+    }
   }
 
   const scorecards = readJSON(TULGA_SCORECARDS_FILE);
@@ -406,8 +524,21 @@ app.post('/api/tulga/scorecard', (req, res) => {
 });
 
 // 12. GET A PARTICIPANT'S SCORECARD
-app.get('/api/tulga/scorecard/:participantId', (req, res) => {
+app.get('/api/tulga/scorecard/:participantId', async (req, res) => {
   const { participantId } = req.params;
+
+  if (pool) {
+    try {
+      const dbRes = await pool.query('SELECT * FROM tulga_scorecards WHERE participant_id = $1 LIMIT 1', [participantId]);
+      if (!dbRes.rows.length) return res.json({});
+      const r = dbRes.rows[0];
+      return res.json({ participantId: r.participant_id, module: r.module, scores: r.scores, total: r.total, note: r.note, updatedAt: r.updated_at });
+    } catch (err) {
+      console.error("Error reading TULGA scorecard from PostgreSQL:", err);
+      return res.status(500).json({ error: "Деректерді оқу қатесі: " + err.message });
+    }
+  }
+
   const scorecards = readJSON(TULGA_SCORECARDS_FILE);
   const record = scorecards.find((s) => s.participantId === participantId);
   res.json(record || {});
@@ -418,26 +549,30 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`====================================================`);
-  console.log(`🕌 Ислами Емтихан Порталы сәтті іске қосылды!`);
-  console.log(`====================================================`);
-  console.log(`💻 Сервер сіздің компьютеріңізде істеп тұр:`);
-  console.log(`   👉 http://localhost:${PORT}`);
-  console.log(``);
-  console.log(`📱 Студенттер өз телефондарынан кіруі үшін`);
-  console.log(`   мына сілтемелердің бірін жіберіңіз (бір желіде болса):`);
+// Start Server (skipped when imported as a serverless function, e.g. on Vercel)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`====================================================`);
+    console.log(`🕌 Ислами Емтихан Порталы сәтті іске қосылды!`);
+    console.log(`====================================================`);
+    console.log(`💻 Сервер сіздің компьютеріңізде істеп тұр:`);
+    console.log(`   👉 http://localhost:${PORT}`);
+    console.log(``);
+    console.log(`📱 Студенттер өз телефондарынан кіруі үшін`);
+    console.log(`   мына сілтемелердің бірін жіберіңіз (бір желіде болса):`);
 
-  // Print out local network IP addresses
-  const nets = os.networkInterfaces();
-  for (const name of Object.keys(nets)) {
-    for (const net of nets[name]) {
-      // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
-      if (net.family === 'IPv4' && !net.internal) {
-        console.log(`   👉 http://${net.address}:${PORT}`);
+    // Print out local network IP addresses
+    const nets = os.networkInterfaces();
+    for (const name of Object.keys(nets)) {
+      for (const net of nets[name]) {
+        // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
+        if (net.family === 'IPv4' && !net.internal) {
+          console.log(`   👉 http://${net.address}:${PORT}`);
+        }
       }
     }
-  }
-  console.log(`====================================================`);
-});
+    console.log(`====================================================`);
+  });
+}
+
+module.exports = app;
