@@ -383,8 +383,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Navigation Items Clicks
   menuItems.forEach(item => {
     item.addEventListener("click", (e) => {
-      e.preventDefault();
       const target = item.getAttribute("data-target");
+      if (!target) return; // сыртқы бетке сілтеме (мысалы, AR макет)
+      e.preventDefault();
       
       // If student clicks Teacher Console, verify passcode first!
       if (target === "teacher-view" && userRole !== "teacher") {

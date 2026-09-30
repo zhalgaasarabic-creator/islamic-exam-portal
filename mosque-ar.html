@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Мәсжід әл-Харам AR</title>
+  <meta name="description" content="Мәсжід әл-Харам мен Қағбаның 3D макеті — браузерде айналдырып қарау және AR (толықтырылған шындық) режимінде үстелге қою.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+  <style>
+    :root {
+      --bg: #F9F6F0;
+      --surface: #FFFFFF;
+      --surface-2: #EFECE5;
+      --text: #1E293B;
+      --text-2: #475569;
+      --muted: #8a94a6;
+      --emerald: #0B4F35;
+      --emerald-soft: #E7EFEA;
+      --gold: #B8963F;
+      --border: #E2E8F0;
+      --viewer-bg: radial-gradient(ellipse at 50% 30%, #fdfbf6 0%, #e9e3d6 100%);
+      --shadow: 0 10px 30px -10px rgba(15, 30, 20, 0.25);
+      --radius: 14px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0A120E;
+        --surface: #121F19;
+        --surface-2: #192C23;
+        --text: #F1F5F9;
+        --text-2: #CBD5E1;
+        --muted: #7c8a9c;
+        --emerald: #1C9A68;
+        --emerald-soft: #163629;
+        --gold: #E5C36B;
+        --border: #1E3329;
+        --viewer-bg: radial-gradient(ellipse at 50% 30%, #1d2e26 0%, #09110d 100%);
+        --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0A120E;
+      --surface: #121F19;
+      --surface-2: #192C23;
+      --text: #F1F5F9;
+      --text-2: #CBD5E1;
+      --muted: #7c8a9c;
+      --emerald: #1C9A68;
+      --emerald-soft: #163629;
+      --gold: #E5C36B;
+      --border: #1E3329;
+      --viewer-bg: radial-gradient(ellipse at 50% 30%, #1d2e26 0%, #09110d 100%);
+      --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+    }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100dvh;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .back {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 38px; height: 38px; border-radius: 10px;
+      color: var(--text-2); background: var(--surface-2);
+      text-decoration: none; flex-shrink: 0;
+    }
+    .back:hover { color: var(--emerald); }
+    .title { min-width: 0; }
+    .title h1 { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.2; }
+    .title h1 .ar { font-family: 'Amiri', serif; color: var(--gold); font-weight: 700; margin-left: 6px; }
+    .title p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+    .theme-btn {
+      margin-left: auto; width: 38px; height: 38px; border-radius: 10px; border: none;
+      background: var(--surface-2); color: var(--text-2); cursor: pointer; flex-shrink: 0;
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      min-height: 0;
+    }
+
+    .stage { position: relative; min-height: 420px; }
+    model-viewer {
+      width: 100%; height: 100%;
+      background: var(--viewer-bg);
+      --poster-color: transparent;
+      --progress-bar-color: var(--gold);
+    }
+
+    .toolbar {
+      position: absolute; left: 16px; top: 16px;
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .tool {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 14px; border-radius: 999px; border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--surface) 88%, transparent);
+      backdrop-filter: blur(6px);
+      color: var(--text); font: 500 13px 'Outfit', sans-serif; cursor: pointer;
+      box-shadow: var(--shadow);
+    }
+    .tool:hover { border-color: var(--gold); }
+    .tool[aria-pressed="false"] { color: var(--muted); }
+
+    .ar-btn {
+      position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%);
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 26px; border-radius: 999px; border: none;
+      background: var(--emerald); color: #fff;
+      font: 600 16px 'Outfit', sans-serif; cursor: pointer;
+      box-shadow: 0 8px 24px -6px rgba(11, 79, 53, 0.55);
+    }
+    .ar-btn i { color: #F2D283; }
+
+    .ar-note {
+      position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%);
+      width: max-content; max-width: calc(100% - 32px);
+      padding: 10px 16px; border-radius: 12px;
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+      border: 1px solid var(--border); color: var(--text-2);
+      font-size: 13px; text-align: center; box-shadow: var(--shadow);
+    }
+    .ar-note i { color: var(--gold); margin-right: 6px; }
+
+    .hotspot {
+      display: block; border: none; background: none; padding: 0; cursor: pointer;
+      --min-hotspot-opacity: 0;
+    }
+    .hotspot .dot {
+      display: block; width: 14px; height: 14px; border-radius: 50%;
+      background: var(--gold); border: 2px solid #fff;
+      box-shadow: 0 0 0 3px rgba(197, 168, 90, 0.35);
+      transform: translate(-50%, -50%);
+      position: absolute; left: 0; top: 0;
+    }
+    .hotspot .label {
+      position: absolute; left: 12px; top: -12px; white-space: nowrap;
+      padding: 4px 10px; border-radius: 8px;
+      background: rgba(11, 22, 17, 0.82); color: #fff;
+      font: 500 12px 'Outfit', sans-serif; pointer-events: none;
+    }
+    .hotspot.active .dot { background: var(--emerald); box-shadow: 0 0 0 4px rgba(242, 210, 131, 0.8); }
+    .hotspot.small .label { display: none; }
+    model-viewer.near .hotspot.small .label, .hotspot.small.active .label { display: block; }
+    model-viewer.no-labels .hotspot { display: none; }
+
+    .loading {
+      position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none;
+      color: var(--text-2); font-size: 14px;
+    }
+    .loading .ring {
+      width: 44px; height: 44px; border-radius: 50%; margin: 0 auto 12px;
+      border: 3px solid var(--border); border-top-color: var(--gold);
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    aside {
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      display: flex; flex-direction: column; min-height: 0;
+    }
+    .detail { padding: 22px 22px 16px; border-bottom: 1px solid var(--border); }
+    .detail .kicker { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--gold); }
+    .detail h2 { margin: 6px 0 2px; font-size: 22px; }
+    .detail .arabic { font-family: 'Amiri', serif; font-size: 22px; color: var(--text-2); direction: rtl; }
+    .detail p { margin: 10px 0 0; font-size: 14.5px; line-height: 1.6; color: var(--text-2); }
+
+    .places { list-style: none; margin: 0; padding: 10px; overflow-y: auto; flex: 1; }
+    .places button {
+      width: 100%; display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px; border: none; border-radius: 10px; background: none;
+      color: var(--text); font: 500 14.5px 'Outfit', sans-serif; text-align: left; cursor: pointer;
+    }
+    .places button:hover { background: var(--surface-2); }
+    .places button.active { background: var(--emerald-soft); color: var(--emerald); }
+    .places .num {
+      width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; flex-shrink: 0;
+      background: var(--surface-2); color: var(--text-2); font-size: 12px; font-weight: 700;
+    }
+    .places button.active .num { background: var(--emerald); color: #fff; }
+    .foot { padding: 12px 22px 16px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); line-height: 1.5; }
+
+    @media (max-width: 900px) {
+      main { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(58dvh, 1fr) auto; }
+      aside { border-left: none; border-top: 1px solid var(--border); }
+      .places { display: flex; gap: 6px; overflow-x: auto; overflow-y: hidden; padding: 10px 16px; flex: none; }
+      .places li { flex-shrink: 0; }
+      .places button { width: auto; white-space: nowrap; padding: 8px 12px; background: var(--surface-2); }
+      .detail { padding: 16px 16px 12px; }
+      .foot { padding: 10px 16px 14px; }
+      header { padding: 10px 16px; }
+      .title p, .title h1 .ar { display: none; }
+      .toolbar { left: 12px; top: 12px; }
+      .tool .txt { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="back" href="index.html" title="Порталға оралу" aria-label="Порталға оралу"><i class="fa-solid fa-arrow-left"></i></a>
+    <div class="title">
+      <h1>Мәсжід әл-Харам <span class="ar">المسجد الحرام</span></h1>
+      <p>3D макет · саусақпен айналдырыңыз, AR-да үстелге қойыңыз</p>
+    </div>
+    <button class="theme-btn" id="theme-btn" title="Түс тақырыбы" aria-label="Түс тақырыбын ауыстыру"><i class="fa-solid fa-circle-half-stroke"></i></button>
+  </header>
+
+  <main>
+    <div class="stage">
+      <model-viewer
+        id="viewer"
+        src="models/masjid-al-haram.glb"
+        alt="Мәсжід әл-Харам мен Қағбаның 3D макеті"
+        camera-controls
+        touch-action="pan-y"
+        auto-rotate
+        auto-rotate-delay="4000"
+        rotation-per-second="8deg"
+        autoplay
+        animation-name="Tawaf"
+        ar
+        ar-modes="webxr scene-viewer quick-look"
+        ar-placement="floor"
+        ar-scale="auto"
+        shadow-intensity="1"
+        shadow-softness="0.8"
+        exposure="1.05"
+        environment-image="neutral"
+        camera-orbit="30deg 58deg 105%"
+        min-camera-orbit="auto 0deg 0.04m"
+        max-camera-orbit="auto 88deg 2.2m"
+        interaction-prompt="auto">
+
+        <button slot="ar-button" class="ar-btn"><i class="fa-solid fa-cube"></i> AR-да көру</button>
+        <div slot="progress-bar"></div>
+      </model-viewer>
+
+      <div class="loading" id="loading"><div><div class="ring"></div>Макет жүктелуде…</div></div>
+
+      <div class="toolbar">
+        <button class="tool" id="play-btn" aria-pressed="true"><i class="fa-solid fa-pause"></i><span class="txt">Тауапты тоқтату</span></button>
+        <button class="tool" id="labels-btn" aria-pressed="true"><i class="fa-solid fa-tag"></i><span class="txt">Белгілер</span></button>
+        <button class="tool" id="reset-btn"><i class="fa-solid fa-rotate-left"></i><span class="txt">Бастапқы көрініс</span></button>
+      </div>
+
+      <div class="ar-note" id="ar-note" hidden><i class="fa-solid fa-mobile-screen-button"></i>AR режимі смартфонда ашылады: Android — Chrome, iPhone — Safari.</div>
+    </div>
+
+    <aside>
+      <div class="detail" id="detail" aria-live="polite">
+        <div class="kicker" id="d-kicker">Шолу</div>
+        <h2 id="d-title">Мәсжід әл-Харам</h2>
+        <div class="arabic" id="d-arabic">المسجد الحرام</div>
+        <p id="d-text"></p>
+      </div>
+      <ul class="places" id="places"></ul>
+      <div class="foot">Бұл — оқу мақсатындағы жеңілдетілген макет, пропорциялары шамамен берілген. Ақ нүктелер — тауап жасап жүрген қажылар.</div>
+    </aside>
+  </main>
+
+  <script type="module">
+    // Нүкте координаттары scripts/build-mosque-model.mjs шығарған мәндерден алынған (1:300 масштаб, метр).
+    const OVERVIEW = {
+      kicker: 'Шолу',
+      title: 'Мәсжід әл-Харам',
+      arabic: 'المسجد الحرام',
+      text: 'Меккедегі қасиетті мешіт — жер бетіндегі ең ұлық мешіт, ортасында Қағба орналасқан. Пайғамбарымыз ﷺ: «Менің мешітімдегі намаз басқа мешіттердегі мың намаздан артық, тек Мәсжід әл-Харам басқа — ондағы намаз жүз мың намаздан артық» деген (Ибн Мәжә). Төмендегі тізімнен бір орынды таңдап, жақынырақ қараңыз.',
+      target: '0m 0.02m -0.05m', orbit: '30deg 58deg 105%',
+    };
+
+    const SMALL = new Set(['hajar', 'maqam', 'hijr', 'mataf']);
+
+    const PLACES = [
+      { id: 'kaaba', title: 'Қағба', arabic: 'الكعبة المشرفة', pos: '0 0.0487 0',
+        orbit: '25deg 70deg 0.16m', target: '0 0.02 0',
+        text: 'Аллаһтың үйі (Байтуллаһ), әлемдегі барлық мұсылмандардың құбыласы. Ибраһим (а.с.) мен ұлы Исмаил (а.с.) тұрғызған. Биіктігі шамамен 13 м. Үстіндегі қара жібек жамылғы — кисуа, ал оның бойындағы Құран аяттары тоқылған алтын белдеу — хизам деп аталады.' },
+      { id: 'hajar', title: 'Хажар әл-Асуад', arabic: 'الحجر الأسود', pos: '-0.0205 0.005 0.0178',
+        orbit: '-35deg 72deg 0.09m', target: '-0.0195 0.006 0.017',
+        text: 'Қағбаның шығыс бұрышына орнатылған қара тас, күміс жиекпен қоршалған. Тауап осы бұрыштан басталып, осы жерде аяқталады; әр айналымда оған қарап «Бисмиллаһ, Аллаһу әкбар» деп қол көтеріледі.' },
+      { id: 'maqam', title: 'Мақам Ибраһим', arabic: 'مقام إبراهيم', pos: '-0.004 0.012 0.0518',
+        orbit: '15deg 68deg 0.1m', target: '-0.004 0.006 0.046',
+        text: 'Ибраһим (а.с.) Қағбаның қабырғасын көтергенде үстінде тұрған тас, онда аяқ ізі сақталған. Алтын түсті қабықшаның ішінде тұр. «Мақам Ибраһимді намаз орны етіп алыңдар» (Бақара, 125) — тауаптан кейін екі рәкағат намаз осы жердің артында оқылады.' },
+      { id: 'hijr', title: 'Хижр Исмаил (Хатым)', arabic: 'حجر إسماعيل', pos: '0.0482 0.005 0',
+        orbit: '100deg 60deg 0.14m', target: '0.03 0.004 0',
+        text: 'Қағбаның солтүстік-батыс қабырғасы жанындағы жарты шеңбер пішінді аласа қабырға. Оның ішкі бөлігі Қағбаға жатады, сондықтан тауап осы қабырғаның сыртынан айналып жасалады. Жоғарыдағы алтын науа — Мизаб ар-рахма.' },
+      { id: 'mataf', title: 'Матаф — тауап алаңы', arabic: 'المطاف', pos: '0 0.0007 -0.1067',
+        orbit: '0deg 45deg 0.4m', target: '0 0 0',
+        text: 'Қағбаны айнала қоршаған ақ мәрмәр алаң. Тауап Қағбаны сол жақта қалдырып, сағат тіліне қарсы жеті айналым жасау арқылы орындалады. Макеттегі ақ нүктелер — тауап жасап жүрген қажылар.' },
+      { id: 'ottoman', title: 'Осман риуағы', arabic: 'الأروقة العثمانية', pos: '0 0.0533 -0.18',
+        orbit: '-20deg 55deg 0.32m', target: '0 0.03 -0.15',
+        text: 'Матафты қоршаған, кішкентай күмбездермен жабылған ежелгі галерея. XVI ғасырдың соңында Осман сұлтандары II Сәлім мен III Мұрат тұсында сәулетші Мимар Синанның жобасымен қайта салынған.' },
+      { id: 'saudi', title: 'Сауд кеңейтуі', arabic: 'التوسعة السعودية الأولى', pos: '-0.2 0.1 0.3267',
+        orbit: '-15deg 62deg 0.6m', target: '-0.15 0.05 0.25',
+        text: 'XX ғасырдың ортасында басталған алғашқы үлкен кеңейту: Осман риуағын сыртынан қоршаған көп қабатты ғимарат. Намаз оқушыларға төбесі мен барлық қабаттары ашық.' },
+      { id: 'gate', title: 'Әбдулазиз патша қақпасы', arabic: 'باب الملك عبدالعزيز', pos: '0 0.14 0.3467',
+        orbit: '0deg 75deg 0.45m', target: '0 0.07 0.33',
+        text: 'Мешіттің басты қақпаларының бірі, екі жағында биік мұнаралары бар. Макетте тағы Әл-Фатх, Умра және Фаһд патша қақпалары көрсетілген.' },
+      { id: 'fahd', title: 'Фаһд патша кеңейтуі', arabic: 'توسعة الملك فهد', pos: '-0.455 0.1367 0',
+        orbit: '-70deg 58deg 0.6m', target: '-0.45 0.06 0',
+        text: 'Мешіттің батыс жағына қосылған қанат, төбесінде үш үлкен күмбез бар. Кіреберісі — екі мұнаралы Фаһд патша қақпасы.' },
+      { id: 'safa', title: 'Сафа төбесі', arabic: 'الصفا', pos: '0.3967 0.1167 0.1667',
+        orbit: '60deg 60deg 0.45m', target: '0.39 0.05 0.12',
+        text: 'Сағы (Сафа мен Марва арасындағы жүріс) осы жерден басталады. Һажар анамыз ұлы Исмаилға су іздеп, осы екі төбенің арасында жеті рет жүгірген.' },
+      { id: 'marwa', title: 'Марва төбесі', arabic: 'المروة', pos: '0.3967 0.1167 -0.5333',
+        orbit: '60deg 60deg 0.5m', target: '0.39 0.05 -0.48',
+        text: 'Сағы Марвада аяқталады. Сафа мен Марва арасы шамамен 400 м; жеті рет жүріп өткенде жалпы жол 3 км-ден асады. Бұл дәліз — Масъа деп аталады.' },
+    ];
+
+    const viewer = document.getElementById('viewer');
+    const list = document.getElementById('places');
+    const $ = (id) => document.getElementById(id);
+
+    // Hotspot-тар мен тізім
+    PLACES.forEach((p, i) => {
+      const hs = document.createElement('button');
+      hs.className = SMALL.has(p.id) ? 'hotspot small' : 'hotspot';
+      hs.slot = `hotspot-${p.id}`;
+      hs.dataset.position = p.pos;
+      hs.dataset.normal = '0 1 0';
+      hs.dataset.visibilityAttribute = 'visible';
+      hs.innerHTML = `<span class="dot"></span><span class="label">${p.title}</span>`;
+      hs.addEventListener('click', () => select(p.id));
+      viewer.appendChild(hs);
+
+      const li = document.createElement('li');
+      li.innerHTML = `<button data-id="${p.id}"><span class="num">${i + 1}</span>${p.title}</button>`;
+      li.firstChild.addEventListener('click', () => select(p.id));
+      list.appendChild(li);
+    });
+
+    function show(p) {
+      $('d-kicker').textContent = p === OVERVIEW ? 'Шолу' : `${PLACES.indexOf(p) + 1} / ${PLACES.length}`;
+      $('d-title').textContent = p.title;
+      $('d-arabic').textContent = p.arabic;
+      $('d-text').textContent = p.text;
+    }
+
+    function select(id) {
+      const p = PLACES.find((x) => x.id === id);
+      if (!p) return;
+      show(p);
+      viewer.autoRotate = false;
+      viewer.cameraTarget = p.target.split(' ').map((n) => `${n}m`).join(' ');
+      viewer.cameraOrbit = p.orbit;
+      document.querySelectorAll('.hotspot').forEach((h) => h.classList.toggle('active', h.slot === `hotspot-${id}`));
+      list.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.id === id));
+      const active = list.querySelector('button.active');
+      if (active) active.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+    }
+
+    function reset() {
+      show(OVERVIEW);
+      viewer.cameraTarget = OVERVIEW.target;
+      viewer.cameraOrbit = OVERVIEW.orbit;
+      viewer.autoRotate = true;
+      document.querySelectorAll('.hotspot.active, .places button.active').forEach((el) => el.classList.remove('active'));
+    }
+
+    viewer.cameraTarget = OVERVIEW.target;
+    show(OVERVIEW);
+
+    // Алыстан қарағанда ұсақ нысандардың жазуларын жасырамыз, жақындағанда көрсетеміз.
+    viewer.addEventListener('camera-change', () => {
+      viewer.classList.toggle('near', viewer.getCameraOrbit().radius < 0.3);
+    });
+
+    viewer.addEventListener('load', () => {
+      $('loading').hidden = true;
+      if (!viewer.canActivateAR) $('ar-note').hidden = false;
+    });
+    viewer.addEventListener('error', () => {
+      $('loading').innerHTML = '<div>Макетті жүктеу мүмкін болмады. Бетті жаңартып көріңіз.</div>';
+    });
+
+    // Тауап анимациясы
+    const playBtn = $('play-btn');
+    playBtn.addEventListener('click', () => {
+      const playing = !viewer.paused;
+      playing ? viewer.pause() : viewer.play();
+      playBtn.setAttribute('aria-pressed', String(!playing));
+      playBtn.innerHTML = playing
+        ? '<i class="fa-solid fa-play"></i><span class="txt">Тауапты бастау</span>'
+        : '<i class="fa-solid fa-pause"></i><span class="txt">Тауапты тоқтату</span>';
+    });
+
+    const labelsBtn = $('labels-btn');
+    labelsBtn.addEventListener('click', () => {
+      const hide = viewer.classList.toggle('no-labels');
+      labelsBtn.setAttribute('aria-pressed', String(!hide));
+    });
+
+    $('reset-btn').addEventListener('click', reset);
+
+    // Тақырып: жүйе баптауы → қолмен ауыстыру (тек осы браузерде сақталады)
+    const root = document.documentElement;
+    try { const t = localStorage.getItem('mosque-ar-theme'); if (t) root.dataset.theme = t; } catch (e) {}
+    $('theme-btn').addEventListener('click', () => {
+      const dark = root.dataset.theme
+        ? root.dataset.theme === 'dark'
+        : matchMedia('(prefers-color-scheme: dark)').matches;
+      root.dataset.theme = dark ? 'light' : 'dark';
+      try { localStorage.setItem('mosque-ar-theme', root.dataset.theme); } catch (e) {}
+    });
+  </script>
+</body>
+</html>
